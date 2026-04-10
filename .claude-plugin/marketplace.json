@@ -1,0 +1,17 @@
+{
+  "name": "claudeops-plugin",
+  "owner": {
+    "name": "JBabcock-DL"
+  },
+  "metadata": {
+    "description": "Marketplace catalog for the dl-agent-workflow Claude Code plugin (sprint-based GitHub Issues + Project workflow)."
+  },
+  "plugins": [
+    {
+      "name": "dl-agent-workflow",
+      "source": ".",
+      "description": "Structured agent workflow for GitHub Issues, a GitHub Project board, and Claude Code — ticket lifecycle skills from create-ticket through research, plan, build, and vqa.",
+      "version": "1.0.0"
+    }
+  ]
+}
