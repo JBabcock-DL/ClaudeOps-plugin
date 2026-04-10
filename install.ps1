@@ -17,10 +17,10 @@
 
 .EXAMPLE
     # From your target repo root:
-    powershell -ExecutionPolicy Bypass -File path\to\ClaudeOps-plugin\install.ps1
+    powershell -ExecutionPolicy Bypass -File path\to\plugin\install.ps1
 
     # Overwrite any existing files:
-    powershell -ExecutionPolicy Bypass -File path\to\ClaudeOps-plugin\install.ps1 -Force
+    powershell -ExecutionPolicy Bypass -File path\to\plugin\install.ps1 -Force
 
 .NOTES
     Prerequisites:
@@ -40,9 +40,8 @@ $ErrorActionPreference = 'Stop'
 # Resolve paths
 # ---------------------------------------------------------------------------
 $ScriptDir          = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$PluginBundle       = Join-Path $ScriptDir 'plugins\dl-agent-workflow'
-$PluginSkillsSrc    = Join-Path $PluginBundle 'skills'
-$PluginTemplatesSrc = Join-Path $PluginBundle 'templates'
+$PluginSkillsSrc    = Join-Path $ScriptDir 'skills'
+$PluginTemplatesSrc = Join-Path $ScriptDir 'templates'
 $TargetDir          = (Get-Location).Path
 $SkillsDest         = Join-Path $TargetDir '.claude\skills'
 $TemplatesDest      = Join-Path $TargetDir '.github\templates'

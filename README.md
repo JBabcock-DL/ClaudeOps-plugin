@@ -20,6 +20,4 @@ A Claude Code plugin that provides a structured agent workflow for managing soft
 
 ## Setup
 
-**Claude Code marketplace:** add [JBabcock-DL/ClaudeOps-plugin](https://github.com/JBabcock-DL/ClaudeOps-plugin), then run `/plugin install dl-agent-workflow@claudeops-plugin`. Details are in [INSTALL.md](./INSTALL.md).
-
-See [INSTALL.md](./INSTALL.md) for prerequisites, manual install scripts, and post-install configuration steps.
+See [INSTALL.md](./INSTALL.md) for prerequisites, install commands, and post-install configuration steps.

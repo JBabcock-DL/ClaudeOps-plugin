@@ -12,43 +12,32 @@ Before installing, verify the following tools are available in your PATH:
 
 ## Install
 
-### Claude Code marketplace (recommended)
+### Unix / macOS (bash)
 
-In Claude Code, add this repository as a marketplace and install the plugin:
-
-```text
-/plugin marketplace add JBabcock-DL/ClaudeOps-plugin
-/plugin install dl-agent-workflow@claudeops-plugin
-```
-
-See Anthropic’s guide: [Create and distribute a plugin marketplace](https://docs.anthropic.com/en/docs/claude-code/plugin-marketplaces).
-
-### Unix / macOS (bash) — copy into a target repo
-
-From the **root of the repository** where you want the workflow (not inside this plugin repo), run:
+Run this from the root of the repo where you cloned `claude-ops`:
 
 ```bash
-bash /path/to/ClaudeOps-plugin/install.sh
+bash plugin/install.sh
 ```
 
 To overwrite existing files in the target repo:
 
 ```bash
-bash /path/to/ClaudeOps-plugin/install.sh --force
+bash plugin/install.sh --force
 ```
 
 ### Windows (PowerShell)
 
-From the **root of the repository** where you want the workflow:
+Run from the root of the repo where you cloned `claude-ops`:
 
 ```powershell
-C:\path\to\ClaudeOps-plugin\install.ps1
+.\plugin\install.ps1
 ```
 
 To overwrite existing files in the target repo:
 
 ```powershell
-C:\path\to\ClaudeOps-plugin\install.ps1 -Force
+.\plugin\install.ps1 -Force
 ```
 
 ---
@@ -57,9 +46,9 @@ C:\path\to\ClaudeOps-plugin\install.ps1 -Force
 
 Both scripts perform the same steps:
 
-1. Verify `gh`, `git`, and (for `install.sh`) `bash` are on PATH
-2. Copy `plugins/dl-agent-workflow/skills/` → `.claude/skills/` (10 skill folders)
-3. Copy `plugins/dl-agent-workflow/templates/` → `.github/templates/` (4 template files)
+1. Verify `gh`, `git`, and `claude` are on PATH
+2. Copy `plugin/skills/` → `.claude/skills/` (10 skill folders)
+3. Copy `plugin/templates/` → `.github/templates/` (4 template files)
 4. Print a post-install checklist
 
 Files are not overwritten unless `--force` / `-Force` is passed.
