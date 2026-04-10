@@ -76,6 +76,26 @@ Then scaffold the following in the current working directory:
 
    - Parse the returned `options` array from the mutation response. For each option, record its `id` keyed by `name`. These are the IDs you will write into `workflow.md` — do not re-query; use the mutation response directly.
 
+5b. **Add a Board (Kanban) view** to the project — new GitHub Projects default to a Table view. Add a Board view grouped by Status so the project opens as a kanban board:
+
+   - Get the project node ID (`PVT_...`) from step 5.
+   - Call `gh api graphql` with the `createProjectV2View` mutation:
+
+   ```
+   gh api graphql -f query='
+   mutation {
+     createProjectV2View(input: {
+       projectId: "<PROJECT_NODE_ID>"
+       name: "Board"
+       layout: BOARD_LAYOUT
+     }) {
+       projectV2View { id name layout }
+     }
+   }'
+   ```
+
+   - Confirm the response returns `layout: BOARD_LAYOUT` before continuing.
+
 6. **You** (the agent) must update `.github/templates/workflow.md` in place—this is not a separate script. Treat the following as your task prompt:
 
    - Run `gh repo view --json owner,nameWithOwner` from the **new repo root** and record `owner.login` and `nameWithOwner` for the **Key Commands** section.
