@@ -76,26 +76,6 @@ Then scaffold the following in the current working directory:
 
    - Parse the returned `options` array from the mutation response. For each option, record its `id` keyed by `name`. These are the IDs you will write into `workflow.md` — do not re-query; use the mutation response directly.
 
-5b. **Add a Board (Kanban) view** to the project — new GitHub Projects default to a Table view. Add a Board view grouped by Status so the project opens as a kanban board:
-
-   - Get the project node ID (`PVT_...`) from step 5.
-   - Call `gh api graphql` with the `createProjectV2View` mutation:
-
-   ```
-   gh api graphql -f query='
-   mutation {
-     createProjectV2View(input: {
-       projectId: "<PROJECT_NODE_ID>"
-       name: "Board"
-       layout: BOARD_LAYOUT
-     }) {
-       projectV2View { id name layout }
-     }
-   }'
-   ```
-
-   - Confirm the response returns `layout: BOARD_LAYOUT` before continuing.
-
 6. **You** (the agent) must update `.github/templates/workflow.md` in place—this is not a separate script. Treat the following as your task prompt:
 
    - Run `gh repo view --json owner,nameWithOwner` from the **new repo root** and record `owner.login` and `nameWithOwner` for the **Key Commands** section.
@@ -104,9 +84,37 @@ Then scaffold the following in the current working directory:
    - Open `.github/templates/workflow.md` and **edit the file**: replace every `[CONFIGURE: ...]` placeholder under **## GitHub Project** and inside the **Key Commands** `bash` block with the real values (project title, `PVT_…` project id, owner, status field id, each status option id, project number, full `owner/repo`). Use the exact string values returned by `gh`; do not invent IDs.
    - Re-read the updated sections and confirm there are **no** remaining `[CONFIGURE:` tokens in **## GitHub Project** or that **Key Commands** block before you finish.
 
-7. Report back:
+7. **Create two starter tickets** to verify the board sync is working. Do this only after step 6 is complete and `workflow.md` has no unresolved `[CONFIGURE: ...]` tokens. Follow the exact same steps as the `create-ticket` skill for each:
+
+   **Ticket 1 — Work Order: "Configure project goal in workflow.md"**
+   - ID: `WO-001`, slug: `configure-project-goal`
+   - Folder: `.github/Sprint 1/WO-001-configure-project-goal/`
+   - Write `ticket.md` using the work_order template; set `github_issue` and `project_item_id` to TBD
+   - Write a stub `plan.md`
+   - Create GitHub issue: `gh issue create --repo <owner/repo> --title "Configure project goal in workflow.md" --label "work-order" --body "Update the [ADD YOUR GOAL HERE] placeholder in .github/templates/workflow.md with a description of what this project is building."`
+   - Capture the issue number; update `github_issue` in `ticket.md`
+   - Add to project board: `gh project item-add <PROJECT_NUMBER> --owner <OWNER> --url https://github.com/<owner/repo>/issues/<N>`
+   - Capture the returned `PVTI_...` item ID; update `project_item_id` in `ticket.md`
+   - Set status to **Context Backlog** using the GraphQL mutation from the Key Commands section of `workflow.md`
+
+   **Ticket 2 — Bug: "Sample bug report"**
+   - ID: `BUG-001`, slug: `sample-bug-report`
+   - Folder: `.github/Sprint 1/BUG-001-sample-bug-report/`
+   - Write `ticket.md` using the bug_report template; set `github_issue` and `project_item_id` to TBD
+   - Write a stub `plan.md`
+   - Create GitHub issue: `gh issue create --repo <owner/repo> --title "Sample bug report" --label "bug" --body "This is a sample bug ticket created during project initialization. Replace with a real bug description."`
+   - Capture the issue number; update `github_issue` in `ticket.md`
+   - Add to project board and capture the `PVTI_...` item ID; update `project_item_id` in `ticket.md`
+   - Set status to **Context Backlog**
+
+8. Report back:
    - Folder structure created
    - GitHub labels created
    - Project board name, number, and node id
    - Confirmation that `.github/templates/workflow.md` was edited and the GitHub Project / Key Commands placeholders are fully resolved
    - Reminder: do not create tickets until that workflow file has no unresolved `[CONFIGURE: ...]` in those sections
+   - **Manual step required — Board view:** GitHub's API does not expose a mutation for creating project views. After setup is complete, the user must add the Board view manually:
+     1. Open the project on GitHub
+     2. Click **+ New view** (tab row at the top)
+     3. Select **Board**
+     The 6 status columns will appear automatically since the Status field is already configured.
