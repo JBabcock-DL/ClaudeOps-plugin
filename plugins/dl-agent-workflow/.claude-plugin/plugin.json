@@ -2,17 +2,5 @@
   "name": "dl-agent-workflow",
   "version": "1.0.0",
   "description": "A structured agent workflow system for managing work across GitHub Issues, a GitHub Project board, and Claude Code. Provides 10 skills covering the full ticket lifecycle: create, research, plan, build (code/doc/script/api/figma), and verify.",
-  "skills": [
-    "create-ticket",
-    "research",
-    "plan",
-    "build",
-    "figma-build",
-    "vqa",
-    "project-start",
-    "code-build",
-    "doc-build",
-    "script-build",
-    "api-build"
-  ]
+  "repository": "https://github.com/JBabcock-DL/ClaudeOps-plugin"
 }
