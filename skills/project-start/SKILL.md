@@ -43,10 +43,19 @@ Then scaffold the following in the current working directory:
    - Create label: bug (#d73a4a)
    - Create label: work-order (#0075ca)
    - Create a new GitHub Project named "$ARGUMENTS" for the repo owner
-   - Note the project ID and update workflow.md with the correct values
+   - Determine the new project's **number** (integer) and **owner login** (user or org), e.g. `gh project list --owner <OWNER_LOGIN> --format json` and match on `title` / `number`
 
-6. Report back:
+6. **You** (the agent) must update `.github/templates/workflow.md` in place—this is not a separate script. Treat the following as your task prompt:
+
+   - Run `gh repo view --json owner,nameWithOwner` from the **new repo root** and record `owner.login` and `nameWithOwner` for the **Key Commands** section.
+   - Run `gh project view <PROJECT_NUMBER> --owner <OWNER_LOGIN> --format json` and read `title`, `id` (Project node id), and `number`.
+   - Run `gh project field-list <PROJECT_NUMBER> --owner <OWNER_LOGIN> --format json`. Locate the **Status** field (`type` is `ProjectV2SingleSelectField`): capture its field `id`, and for each option whose `name` aligns with Context Backlog, In Research, In Planning, In Build, In Verification, and Completed, capture that option's `id`. If the board uses different labels, map sensibly or ask the user before writing.
+   - Open `.github/templates/workflow.md` and **edit the file**: replace every `[CONFIGURE: ...]` placeholder under **## GitHub Project** and inside the **Key Commands** `bash` block with the real values from the JSON above (project title, `PVT_…` project id, owner, status field id, each status option id, project number, full `owner/repo`). Use the exact string values returned by `gh`; do not invent IDs.
+   - Re-read the updated sections and confirm there are **no** remaining `[CONFIGURE:` tokens in **## GitHub Project** or that **Key Commands** block before you finish.
+
+7. Report back:
    - Folder structure created
    - GitHub labels created
-   - Project board name and ID
-   - Reminder to update workflow.md with the new project's GitHub Project IDs before creating tickets
+   - Project board name, number, and node id
+   - Confirmation that `.github/templates/workflow.md` was edited and the GitHub Project / Key Commands placeholders are fully resolved
+   - Reminder: do not create tickets until that workflow file has no unresolved `[CONFIGURE: ...]` in those sections
