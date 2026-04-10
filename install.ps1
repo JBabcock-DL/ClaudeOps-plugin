@@ -40,8 +40,9 @@ $ErrorActionPreference = 'Stop'
 # Resolve paths
 # ---------------------------------------------------------------------------
 $ScriptDir          = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$PluginSkillsSrc    = Join-Path $ScriptDir 'skills'
-$PluginTemplatesSrc = Join-Path $ScriptDir 'templates'
+$PluginBundle       = Join-Path $ScriptDir 'plugins\dl-agent-workflow'
+$PluginSkillsSrc    = Join-Path $PluginBundle 'skills'
+$PluginTemplatesSrc = Join-Path $PluginBundle 'templates'
 $TargetDir          = (Get-Location).Path
 $SkillsDest         = Join-Path $TargetDir '.claude\skills'
 $TemplatesDest      = Join-Path $TargetDir '.github\templates'

@@ -57,9 +57,9 @@ C:\path\to\ClaudeOps-plugin\install.ps1 -Force
 
 Both scripts perform the same steps:
 
-1. Verify `gh`, `git`, and `claude` are on PATH
-2. Copy `skills/` → `.claude/skills/` (10 skill folders)
-3. Copy `templates/` → `.github/templates/` (4 template files)
+1. Verify `gh`, `git`, and (for `install.sh`) `bash` are on PATH
+2. Copy `plugins/dl-agent-workflow/skills/` → `.claude/skills/` (10 skill folders)
+3. Copy `plugins/dl-agent-workflow/templates/` → `.github/templates/` (4 template files)
 4. Print a post-install checklist
 
 Files are not overwritten unless `--force` / `-Force` is passed.

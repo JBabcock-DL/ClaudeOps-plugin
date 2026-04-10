@@ -32,8 +32,9 @@ set -e
 # Resolve script location so the script can be run from any directory
 # ---------------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PLUGIN_SKILLS_SRC="${SCRIPT_DIR}/skills"
-PLUGIN_TEMPLATES_SRC="${SCRIPT_DIR}/templates"
+PLUGIN_BUNDLE="${SCRIPT_DIR}/plugins/dl-agent-workflow"
+PLUGIN_SKILLS_SRC="${PLUGIN_BUNDLE}/skills"
+PLUGIN_TEMPLATES_SRC="${PLUGIN_BUNDLE}/templates"
 TARGET_DIR="$(pwd)"
 SKILLS_DEST="${TARGET_DIR}/.claude/skills"
 TEMPLATES_DEST="${TARGET_DIR}/.github/templates"
