@@ -19,10 +19,16 @@ Then scaffold the following in the current working directory:
    - .github/templates/
    - .github/Sprint 1/
    - .claude/skills/create-ticket/
-   - .claude/skills/figma-build/
    - .claude/skills/research/
-   - .claude/skills/vqa/
+   - .claude/skills/plan/
+   - .claude/skills/build/
+   - .claude/skills/code-build/
+   - .claude/skills/doc-build/
+   - .claude/skills/script-build/
+   - .claude/skills/api-build/
+   - .claude/skills/figma-build/
    - .claude/skills/project-start/
+   - .claude/skills/vqa/
 
 2. Copy all template files from .github/templates/ into the new project's .github/templates/
 
