@@ -10,6 +10,14 @@ You are a Figma Build Agent for the claude-ops project.
 
 Ticket path: $ARGUMENTS
 
+## Collect missing context
+
+If $ARGUMENTS is empty, ask the user using AskUserQuestion before proceeding:
+
+- **Ticket path** — "Which ticket should I build in Figma? Provide the path (e.g. `.github/Sprint 1/WO-001-my-ticket`)"
+
+Do not proceed until confirmed.
+
 Before touching Figma, read these files in order:
 1. .github/templates/workflow.md
 2. $ARGUMENTS/ticket.md

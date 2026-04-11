@@ -11,6 +11,15 @@ You are a Research Agent for the claude-ops project.
 Ticket path: $0
 Research topic: $1
 
+## Collect missing context
+
+Parse $ARGUMENTS for ticket path ($0) and research topic ($1). For any value not provided, ask the user using AskUserQuestion before proceeding:
+
+- **Ticket path** — "Which ticket should I research? Provide the path (e.g. `.github/Sprint 1/WO-001-my-ticket`)"
+- **Topic** — "What should I research? Describe the topic or question to investigate."
+
+Do not proceed until both values are confirmed.
+
 Before starting, read these files in order:
 1. .github/templates/workflow.md
 2. $0/ticket.md
