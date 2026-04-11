@@ -62,6 +62,7 @@ When it finishes, your repo is fully wired — tickets you create will sync to t
 | Skill | Invoke | Description |
 |---|---|---|
 | `project-start` | `/project-start "Name"` | Scaffolds the workflow system in a new repo |
+| `new-agent` | `/new-agent` | Spins up a new agent session — collects sprint/ticket/role context, orients via the handoff doc, then invokes the right skill to start work |
 | `create-ticket` | `/create-ticket wo "Title"` or `/create-ticket bug "Title"` | Creates a ticket locally and syncs it to the GitHub Project board |
 | `research` | `/research` | Investigates a ticket's problem domain and writes findings to `research/` |
 | `plan` | `/plan` | Writes or refines `plan.md` using Claude's native plan mode |

@@ -18,6 +18,7 @@ Then scaffold the following in the current working directory:
 1. Folder structure:
    - .github/templates/
    - .github/Sprint 1/
+   - .claude/skills/new-agent/
    - .claude/skills/create-ticket/
    - .claude/skills/research/
    - .claude/skills/plan/
