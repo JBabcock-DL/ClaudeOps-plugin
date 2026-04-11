@@ -8,7 +8,7 @@
   },
   "plugins": [
     {
-      "name": "DL-agent-workflow",
+      "name": "labs-agent-workflow",
       "source": "./",
       "description": "Structured agent workflow for GitHub Issues, a GitHub Project board, and Claude Code — ticket lifecycle skills from create-ticket through research, plan, build, and vqa.",
       "version": "1.0.0"

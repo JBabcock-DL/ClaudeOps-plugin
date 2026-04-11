@@ -1,5 +1,5 @@
 {
-  "name": "DL-agent-workflow",
+  "name": "labs-agent-workflow",
   "version": "1.0.0",
   "description": "A structured agent workflow system for managing work across GitHub Issues, a GitHub Project board, and Claude Code. Provides 11 skills covering the full ticket lifecycle: create, research, plan, build (code/doc/script/api/figma), project-start, and verify."
 }
