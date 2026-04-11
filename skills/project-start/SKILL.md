@@ -84,28 +84,23 @@ Then scaffold the following in the current working directory:
    - Open `.github/templates/workflow.md` and **edit the file**: replace every `[CONFIGURE: ...]` placeholder under **## GitHub Project** and inside the **Key Commands** `bash` block with the real values (project title, `PVT_…` project id, owner, status field id, each status option id, project number, full `owner/repo`). Use the exact string values returned by `gh`; do not invent IDs.
    - Re-read the updated sections and confirm there are **no** remaining `[CONFIGURE:` tokens in **## GitHub Project** or that **Key Commands** block before you finish.
 
-7. **Create two starter tickets** to verify the board sync is working. Do this only after step 6 is complete and `workflow.md` has no unresolved `[CONFIGURE: ...]` tokens. Follow the exact same steps as the `create-ticket` skill for each:
+7. **Create two starter tickets** using the Skill tool. Do this only after step 6 is complete and `workflow.md` has no unresolved `[CONFIGURE: ...]` tokens.
 
-   **Ticket 1 — Work Order: "Configure project goal in workflow.md"**
-   - ID: `WO-001`, slug: `configure-project-goal`
-   - Folder: `.github/Sprint 1/WO-001-configure-project-goal/`
-   - Write `ticket.md` using the work_order template; set `github_issue` and `project_item_id` to TBD
-   - Write a stub `plan.md`
-   - Create GitHub issue: `gh issue create --repo <owner/repo> --title "Configure project goal in workflow.md" --label "work-order" --body "Update the [ADD YOUR GOAL HERE] placeholder in .github/templates/workflow.md with a description of what this project is building."`
-   - Capture the issue number; update `github_issue` in `ticket.md`
-   - Add to project board: `gh project item-add <PROJECT_NUMBER> --owner <OWNER> --url https://github.com/<owner/repo>/issues/<N>`
-   - Capture the returned `PVTI_...` item ID; update `project_item_id` in `ticket.md`
-   - Set status to **Context Backlog** using the GraphQL mutation from the Key Commands section of `workflow.md`
+   Use the Skill tool exactly as follows — do not invent titles, do not create GitHub issues yourself, do not add anything to the project board yourself. The `create-ticket` skill handles all of that.
 
-   **Ticket 2 — Bug: "Sample bug report"**
-   - ID: `BUG-001`, slug: `sample-bug-report`
-   - Folder: `.github/Sprint 1/BUG-001-sample-bug-report/`
-   - Write `ticket.md` using the bug_report template; set `github_issue` and `project_item_id` to TBD
-   - Write a stub `plan.md`
-   - Create GitHub issue: `gh issue create --repo <owner/repo> --title "Sample bug report" --label "bug" --body "This is a sample bug ticket created during project initialization. Replace with a real bug description."`
-   - Capture the issue number; update `github_issue` in `ticket.md`
-   - Add to project board and capture the `PVTI_...` item ID; update `project_item_id` in `ticket.md`
-   - Set status to **Context Backlog**
+   First call — pass this argument string exactly:
+   ```
+   wo "Configure project goal in workflow.md"
+   ```
+
+   Wait for it to complete and confirm a ticket folder was created under `.github/Sprint 1/` before continuing.
+
+   Second call — pass this argument string exactly:
+   ```
+   bug "Sample bug report"
+   ```
+
+   Wait for it to complete. Both tickets must appear in `.github/Sprint 1/` with a `ticket.md`, `plan.md`, a GitHub issue number, and a project board item ID before you proceed to step 8.
 
 8. Report back:
    - Folder structure created
