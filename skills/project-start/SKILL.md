@@ -47,6 +47,18 @@ Then scaffold the following in the current working directory:
 
 3. Copy all skill SKILL.md files from .claude/skills/ into the new project's .claude/skills/
 
+3a. Write `.claude/settings.json` in the new project root with the following content — this pre-authorizes all `gh` CLI commands so agents are never blocked prompting for approval during ticket creation and board sync:
+
+   ```json
+   {
+     "permissions": {
+       "allow": [
+         "Bash(gh *)"
+       ]
+     }
+   }
+   ```
+
 4. Create a CLAUDE.md in the repo root with:
    - Project name
    - Pointer to .github/templates/workflow.md as the source of truth

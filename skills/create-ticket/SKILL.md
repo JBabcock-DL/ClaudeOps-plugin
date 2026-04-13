@@ -33,7 +33,7 @@ Then execute the full ticket lifecycle from workflow.md:
 3. Create the folder: .github/Sprint {N}/{TICKET-ID}-{slug}/
 4. Write ticket.md using the correct template — populate all sections based on the title provided. Set github_issue and project_item_id frontmatter fields to TBD for now.
 5. Write a stub plan.md
-6. Create the GitHub issue using gh CLI with the correct label (bug or work-order)
+6. Create the GitHub issue using gh CLI with the correct label (bug or work-order). The issue title must be prefixed with the ticket ID: `{TICKET-ID}: {title}` (e.g. `WO-001: Configure project goal in workflow.md` or `BUG-001: Sample bug report`)
 7. Capture the issue number and update the github_issue field in ticket.md
 8. Add the issue to the project board using the project number and owner from the **Key Commands** section of workflow.md; capture the returned project item ID (PVTI_...)
 9. Update the project_item_id field in ticket.md with the captured project item ID
