@@ -46,7 +46,7 @@ All work is managed through GitHub Issues synced to the **claude-ops** GitHub Pr
 2. **Research** *(optional, recommended for unfamiliar work)* — `/research` investigates the problem domain and writes findings to `research/`; moves ticket to **In Research**
 3. **Plan** — `/plan` enters plan mode for interactive review, writes the approved plan to `plan.md` (including a `## Build Agents` section defining parallel phases), and moves ticket to **In Planning**
 4. **Build** — `/build` reads the `## Build Agents` section, moves ticket to **In Build**, and spawns build agents in parallel phases; agents within a phase run simultaneously, phases run sequentially. Individual build skills (`/code-build`, `/doc-build`, `/script-build`, `/api-build`, `/figma-build`) can be used directly for single-domain tickets.
-5. **Verify** — `/vqa` runs a QA pass; moves ticket to **In Verification** → **Completed**
+5. **Verify** — `/vqa` runs a QA pass; moves ticket to **In Review** → **Completed**
 
 > Skip research for well-understood, mechanical tickets where requirements are unambiguous.
 
@@ -72,7 +72,7 @@ All work is managed through GitHub Issues synced to the **claude-ops** GitHub Pr
 | In Research | `[CONFIGURE: option ID for In Research status]` |
 | In Planning | `[CONFIGURE: option ID for In Planning status]` |
 | In Build | `[CONFIGURE: option ID for In Build status]` |
-| In Verification | `[CONFIGURE: option ID for In Verification status]` |
+| In Review | `[CONFIGURE: option ID for In Review status]` |
 | Completed | `[CONFIGURE: option ID for Completed status]` |
 
 ---

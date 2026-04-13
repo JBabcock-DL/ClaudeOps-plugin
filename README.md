@@ -50,7 +50,7 @@ The agent will:
 3. Create a `CLAUDE.md` at the repo root
 4. Create GitHub labels (`bug`, `work-order`) via `gh`
 5. Create a GitHub Project board named after your project
-6. Configure the board's Status field with the 6 workflow columns (Context Backlog → In Research → In Planning → In Build → In Verification → Completed)
+6. Configure the board's Status field with the 6 workflow columns (Context Backlog → In Research → In Planning → In Build → In Review → Completed)
 7. Write all project IDs (board ID, field ID, status option IDs) into `.github/templates/workflow.md`
 
 When it finishes, your repo is fully wired — tickets you create will sync to the board automatically.

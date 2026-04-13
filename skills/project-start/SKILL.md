@@ -73,7 +73,7 @@ Then scaffold the following in the current working directory:
          { name: "In Research",     color: PURPLE, description: "" }
          { name: "In Planning",     color: YELLOW, description: "" }
          { name: "In Build",        color: ORANGE, description: "" }
-         { name: "In Verification", color: RED,    description: "" }
+         { name: "In Review", color: RED,    description: "" }
          { name: "Completed",       color: GREEN,  description: "" }
        ]
      }) {
