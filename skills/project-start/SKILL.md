@@ -10,6 +10,18 @@ You are initializing a new project using the claude-ops workflow system.
 
 Project name: $ARGUMENTS
 
+## Collect missing context
+
+If $ARGUMENTS is empty, ask the user using AskUserQuestion:
+
+- **Project name** — "What is the name of this project?"
+
+Then ask the user using AskUserQuestion:
+
+- **Project goal** — "What is the goal of this project? This will be written into workflow.md as the source-of-truth description for all agents working in this repo."
+
+Do not proceed until both values are confirmed.
+
 Read this file first to understand the full system you are replicating:
 .github/templates/workflow.md
 
@@ -83,7 +95,8 @@ Then scaffold the following in the current working directory:
    - Run `gh project view <PROJECT_NUMBER> --owner <OWNER_LOGIN> --format json` and read `title`, `id` (Project node id), and `number`.
    - Use the Status field ID and the 6 option IDs captured from the mutation in step 5a — do not run field-list again.
    - Open `.github/templates/workflow.md` and **edit the file**: replace every `[CONFIGURE: ...]` placeholder under **## GitHub Project** and inside the **Key Commands** `bash` block with the real values (project title, `PVT_…` project id, owner, status field id, each status option id, project number, full `owner/repo`). Use the exact string values returned by `gh`; do not invent IDs.
-   - Re-read the updated sections and confirm there are **no** remaining `[CONFIGURE:` tokens in **## GitHub Project** or that **Key Commands** block before you finish.
+   - Replace the `[ADD YOUR GOAL HERE]` placeholder under **## Project Goal** with the project goal provided by the user.
+   - Re-read the updated sections and confirm there are **no** remaining `[CONFIGURE:` tokens in **## GitHub Project** or that **Key Commands** block, and no `[ADD YOUR GOAL HERE]` placeholder remaining, before you finish.
 
 7. **Create two starter tickets** using the Skill tool. Do this only after step 6 is complete and `workflow.md` has no unresolved `[CONFIGURE: ...]` tokens.
 
