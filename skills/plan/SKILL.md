@@ -23,6 +23,8 @@ Before planning anything, read these files in order:
 3. $ARGUMENTS/plan.md (if it exists — note whether it is a stub or already has steps)
 4. Any files in $ARGUMENTS/research/ if they exist
 
+**CTX guard.** If the resolved ticket folder name matches `CTX-*`, stop immediately and tell the user: "Plans are only written against `bug` or `work-order` tickets. Promote this context ticket first with `/create-ticket promote {CTX-ID}` or run `/create-backlog`."
+
 Planning rules:
 - Do not start building anything — this is a planning step only
 - Plans must be grounded in the ticket's Requirements and Success Criteria
@@ -74,5 +76,7 @@ Rules for the Build Agents section:
 Execution steps (in order):
 1. Use EnterPlanMode to enter plan mode. During plan mode, write the complete plan content to the plan file using the Write tool. Present the plan for user review. Do not touch the ticket folder yet.
 2. After the user approves and ExitPlanMode completes, IMMEDIATELY write the full plan content to $ARGUMENTS/plan.md using the Write tool. This is required — the plan mode file and the ticket plan.md are separate files. Do not skip this step.
-3. IMMEDIATELY after writing plan.md, move the GitHub issue to In Planning using the GraphQL mutation from workflow.md and the item ID from the ticket's github_issue frontmatter field.
-4. Report back: confirm plan.md was written, confirm the GitHub issue was moved to In Planning, summarize the approach and step count, list any open questions, and state whether a build agent can start immediately.
+3. IMMEDIATELY after writing plan.md, move the ticket to **In Planning**, using the method determined by the **Backend:** field in workflow.md:
+   - **GitHub backend:** GraphQL `updateProjectV2ItemFieldValue` mutation from the **Key Commands (GitHub)** block in workflow.md, using the `project_item_id` from ticket.md frontmatter and the In Planning option ID from workflow.md.
+   - **Jira backend:** via the Atlassian MCP `editJiraIssue` tool on the key in the ticket's `jira_issue` frontmatter — remove any `phase:*` label and add `phase:in-planning`.
+4. Report back: confirm plan.md was written, confirm the ticket was moved to In Planning on the active backend, summarize the approach and step count, list any open questions, and state whether a build agent can start immediately.

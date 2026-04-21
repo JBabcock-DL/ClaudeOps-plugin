@@ -24,8 +24,14 @@ Before starting, read these files in order:
 1. .github/templates/workflow.md
 2. $0/ticket.md
 
+**CTX guard.** If the resolved ticket folder name matches `CTX-*`, stop immediately and tell the user: "Research cannot run on a context ticket — promote it first with `/create-ticket promote {CTX-ID}` or run `/create-backlog` to bulk-triage."
+
+First, read the **Backend:** field in `workflow.md` to determine whether this project uses the `github` or `jira` backend. Use that to select the correct phase-transition and sync method below.
+
 Then execute these steps in order:
-1. Move the GitHub issue to In Research using the status option ID from workflow.md.
+1. Move the ticket to **In Research**:
+   - **GitHub backend:** update the Status field on the project board using the option ID from workflow.md (GraphQL mutation in the **Key Commands (GitHub)** block) and the `project_item_id` from ticket.md frontmatter.
+   - **Jira backend:** via the Atlassian MCP, remove any existing `phase:*` label from the Jira issue (`jira_issue` in ticket.md frontmatter) and add `phase:in-research`.
 2. Understand the ticket's Problem Story, Requirements, and Success Criteria.
 3. Research $1 thoroughly — use web search, read relevant files in the repo, and consult any references linked in ticket.md.
 4. Create the directory $0/research/ if it does not exist.
@@ -35,6 +41,8 @@ Then execute these steps in order:
 6. Update $0/ticket.md with two changes based on your findings:
    a. **Refine the Requirements** — replace or augment the existing Requirements checklist with concrete, research-informed requirements. Remove any placeholder or generic items that the research has made more specific.
    b. **Add research links to References** — append each research file written to the References section as a markdown link, e.g. `- [Topic](research/filename.md)`
-7. Sync the updated ticket to GitHub — edit the issue body using `gh issue edit {github_issue} --repo {owner}/{repo} --body "..."` so the refined requirements and references are visible on GitHub.
+7. Sync the updated ticket to the active backend:
+   - **GitHub backend:** `gh issue edit {github_issue} --repo {owner}/{repo} --body "..."` with the refreshed ticket body.
+   - **Jira backend:** use the Atlassian MCP's `editJiraIssue` tool to update the issue description on `{jira_issue}`.
 8. Update $0/plan.md — add any decisions, constraints, or blockers surfaced by the research under Notes.
 9. Report back: what was researched, what file was written, what requirements changed, and any blockers found.

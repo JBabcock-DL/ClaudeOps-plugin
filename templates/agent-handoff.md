@@ -7,13 +7,14 @@
 ## Handoff Prompt
 
 ```
-You are working on the claude-ops project — managed through GitHub Issues and a GitHub Project board.
+You are working on the claude-ops project. Tickets sync to either GitHub (Issues + Project board) or Jira (via the Atlassian MCP) — check the **Backend:** field in workflow.md to know which one.
 
 Before doing anything else, read these files in order:
 
-  1. .github/templates/workflow.md     ← project structure, conventions, IDs, and full ticket lifecycle
+  1. .github/templates/workflow.md     ← project structure, conventions, IDs, backend selection, and full ticket lifecycle
   2. .github/templates/bug_report.md   ← use this when the task is a bug ticket
   3. .github/templates/work_order.md   ← use this when the task is a work order ticket
+  4. .github/templates/context.md      ← use this when the task is a raw context dump awaiting triage
 
 These files are your source of truth. Do not proceed until you have read them.
 
@@ -37,10 +38,19 @@ Append one of the following after the base prompt above depending on the agent's
 ```
 ROLE: Ticket Creation
 
-Take the brief below and produce a properly structured local ticket folder and a synced GitHub issue on the Process Demo project board. Follow the ticket lifecycle in workflow.md exactly.
+Take the brief below and produce a properly structured local ticket folder and a synced remote issue on the active ticket backend (GitHub Project board or Jira — whichever is set in workflow.md). Follow the ticket lifecycle in workflow.md exactly.
 
 Brief: [DESCRIBE THE WORK]
-Type: [bug | work-order]
+Type: [bug | work-order | context]
+```
+
+### Backlog Triage Agent
+```
+ROLE: Backlog Triage
+
+Walk every unpromoted CTX-* ticket in the given sprint, classify each into a bug or work-order with user confirmation, then delegate the actual mutation to /create-ticket promote CTX-###. Do not research, plan, or build — triage only.
+
+Sprint: Sprint {N}
 ```
 
 ### Planning Agent
@@ -60,7 +70,7 @@ Planning conventions:
 - plan.md MUST include a `## Build Agents` section defining parallel phases — the `/build` orchestrator requires it
 - Every step must be assigned to exactly one build domain in the `## Build Agents` section
 - Independent steps can be parallelized across phases; steps with dependencies on earlier output must be in a later phase
-- Move the GitHub issue to In Planning when plan.md is written
+- Move the ticket to In Planning when plan.md is written (GitHub: update the Status field; Jira: swap the `phase:*` label)
 - A build agent should not start until all open questions are resolved
 
 ---
@@ -83,7 +93,7 @@ Plan:   .github/Sprint {N}/{TICKET-ID}-{slug}/plan.md
 ```
 ROLE: Build — [SPECIFY DOMAIN — spawned by /build orchestrator or run directly for single-domain tickets]
 
-Execute only the steps assigned to your domain in the plan below. Do not modify ticket.md or the GitHub issue. Check off each assigned step in plan.md as you complete it.
+Execute only the steps assigned to your domain in the plan below. Do not modify ticket.md or the remote issue (GitHub issue or Jira issue). Check off each assigned step in plan.md as you complete it.
 
 Ticket: .github/Sprint {N}/{TICKET-ID}-{slug}/ticket.md
 Plan:   .github/Sprint {N}/{TICKET-ID}-{slug}/plan.md
@@ -105,7 +115,7 @@ Steps:  [LIST THE SPECIFIC STEP NUMBERS ASSIGNED TO THIS AGENT]
 ```
 ROLE: Research
 
-Investigate the topic in the ticket below and write your findings into the research/ subfolder as .md files. Refine the ticket's Requirements based on findings and add research file links to the ticket's References section. Sync the updated ticket to GitHub. Update plan.md Notes with any decisions or blockers. Move the GitHub issue to In Research when starting — leave it there when done.
+Investigate the topic in the ticket below and write your findings into the research/ subfolder as .md files. Refine the ticket's Requirements based on findings and add research file links to the ticket's References section. Sync the updated ticket to the active backend (GitHub issue body or Jira issue description). Update plan.md Notes with any decisions or blockers. Move the ticket to In Research when starting (GitHub: Status field → In Research; Jira: replace the `phase:*` label with `phase:in-research`) — leave it there when done.
 
 Ticket: .github/Sprint {N}/{TICKET-ID}-{slug}/ticket.md
 Output: .github/Sprint {N}/{TICKET-ID}-{slug}/research/{topic}.md
@@ -115,7 +125,7 @@ Output: .github/Sprint {N}/{TICKET-ID}-{slug}/research/{topic}.md
 ```
 ROLE: Review / VQA
 
-Verify completed work against the Success Criteria and Testing & VQA sections in the ticket below. Write a vqa-report.md in the research/ subfolder. Move to Completed if all pass, or back to In Build with a GitHub issue comment if anything fails.
+Verify completed work against the Success Criteria and Testing & VQA sections in the ticket below. Write a vqa-report.md in the research/ subfolder. Move to Completed if all pass, or back to In Build with a comment on the remote issue (GitHub issue comment or Jira issue comment via the Atlassian MCP) if anything fails.
 
 Ticket: .github/Sprint {N}/{TICKET-ID}-{slug}/ticket.md
 Output: .github/Sprint {N}/{TICKET-ID}-{slug}/research/vqa-report.md

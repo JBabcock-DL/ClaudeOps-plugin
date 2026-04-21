@@ -26,7 +26,7 @@ Before writing any scripts, read these files in order:
 
 Rules:
 - Do not start if plan.md has no steps defined — report back that the plan needs to be written first
-- Do not modify ticket.md or the GitHub issue — your job is scripting only
+- Do not modify ticket.md or the remote issue (GitHub or Jira) — your job is scripting only
 - Write scripts to $ARGUMENTS/scripts/ unless the plan specifies another location
 - Always quote variables and paths to prevent word splitting and injection
 - Validate inputs and dependencies (required CLIs, env vars) at the top of every script
@@ -36,7 +36,9 @@ Rules:
 Execution:
 1. Read the ticket's Requirements and Success Criteria fully
 2. Read plan.md and identify each unchecked step
-3. Move the GitHub issue to In Build using the status option ID from workflow.md
+3. Move the ticket to **In Build**, using the method determined by the **Backend:** field in workflow.md:
+   - **GitHub backend:** GraphQL mutation from the **Key Commands (GitHub)** block using the In Build option ID and the ticket's `project_item_id`.
+   - **Jira backend:** via the Atlassian MCP `editJiraIssue` tool on the ticket's `jira_issue` — swap any `phase:*` label to `phase:in-build`.
 4. Execute each step — write scripts to the appropriate location
 5. Check off each step in plan.md as you complete it
 6. Record script paths, flags, and usage notes under Notes in plan.md

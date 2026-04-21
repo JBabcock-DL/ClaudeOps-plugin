@@ -1,5 +1,5 @@
 {
   "name": "labs-agent-workflow",
   "version": "1.0.0",
-  "description": "A structured agent workflow system for managing work across GitHub Issues, a GitHub Project board, and Claude Code. Provides 11 skills covering the full ticket lifecycle: create, research, plan, build (code/doc/script/api/figma), project-start, and verify."
+  "description": "A structured agent workflow system for managing work in Claude Code, backed by either GitHub Issues + a GitHub Project board or Jira Cloud via the Atlassian MCP. Provides 12 skills covering the full ticket lifecycle: project-start, create-ticket (bug / work-order / context + promote), create-backlog (bulk triage), research, plan, build (code/doc/script/api/figma), and verify."
 }

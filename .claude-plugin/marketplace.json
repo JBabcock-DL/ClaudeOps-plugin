@@ -4,13 +4,13 @@
     "name": "Detroit Labs"
   },
   "metadata": {
-    "description": "Marketplace catalog for the DL-agent-workflow Claude Code plugin (sprint-based GitHub Issues + Project workflow)."
+    "description": "Marketplace catalog for the DL-agent-workflow Claude Code plugin (sprint-based ticket workflow over GitHub Issues + Project or Jira Cloud via the Atlassian MCP)."
   },
   "plugins": [
     {
       "name": "labs-agent-workflow",
       "source": "./",
-      "description": "Structured agent workflow for GitHub Issues, a GitHub Project board, and Claude Code — ticket lifecycle skills from create-ticket through research, plan, build, and vqa.",
+      "description": "Structured agent workflow for Claude Code with pluggable ticket backend — GitHub Issues + a Project board, or Jira Cloud via the Atlassian MCP. Ticket lifecycle skills from create-ticket through research, plan, build, and vqa.",
       "version": "1.0.0"
     }
   ]

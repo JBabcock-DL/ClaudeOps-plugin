@@ -26,7 +26,7 @@ Before writing any code, read these files in order:
 
 Rules:
 - Do not start if plan.md has no steps defined — report back that the plan needs to be written first
-- Do not modify ticket.md or the GitHub issue — your job is API integration only
+- Do not modify ticket.md or the remote issue (GitHub or Jira) — your job is API integration only
 - Never hardcode credentials, API keys, or secrets — use environment variables
 - Validate at system boundaries (user input, API responses) but trust internal code
 - For Claude API work: default to the latest capable model (`claude-opus-4-6` or `claude-sonnet-4-6`) unless the plan specifies otherwise; use the Anthropic SDK
@@ -35,7 +35,9 @@ Rules:
 Execution:
 1. Read the ticket's Requirements and Success Criteria fully
 2. Read plan.md and identify each unchecked step
-3. Move the GitHub issue to In Build using the status option ID from workflow.md
+3. Move the ticket to **In Build**, using the method determined by the **Backend:** field in workflow.md:
+   - **GitHub backend:** GraphQL mutation from the **Key Commands (GitHub)** block using the In Build option ID and the ticket's `project_item_id`.
+   - **Jira backend:** via the Atlassian MCP `editJiraIssue` tool on the ticket's `jira_issue` — swap any `phase:*` label to `phase:in-build`.
 4. Execute each step — read existing integration patterns in the repo before writing new ones
 5. Check off each step in plan.md as you complete it
 6. Record API endpoints used, SDK version, auth method, and any gotchas under Notes in plan.md
