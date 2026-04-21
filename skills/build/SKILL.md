@@ -17,6 +17,22 @@ If $ARGUMENTS is empty, ask the user using AskUserQuestion before proceeding:
 
 Do not proceed until confirmed.
 
+### Git strategy
+
+Always ask the user using AskUserQuestion (even if $ARGUMENTS was provided):
+
+- **Git strategy** — "How should build agents handle git for this ticket?"
+  - `branch-per-agent` — Each agent creates its own branch (`{TICKET-ID}/{domain}`), commits its work, pushes, and opens a PR. Requires Claude Code worktrees for safe parallel execution; pick this if you have worktrees set as the default.
+  - `main` — All agents work on the current branch and leave changes uncommitted for you to review. No branches created, no PRs opened. Pick this if you do not have worktrees configured.
+
+Record the chosen strategy. It must be injected verbatim into every spawned build agent's prompt (see Execution step 3) so agents behave consistently.
+
+Capture these values too — you will need them for agent prompts and for the final report:
+- **Ticket ID** — the `{TICKET-ID}` portion of the ticket folder name (e.g. `WO-001`)
+- **Base branch** — the repository's default branch (e.g. `main`); detect with `gh repo view --json defaultBranchRef -q .defaultBranchRef.name` or fall back to the current branch
+
+Do not proceed until the strategy is confirmed.
+
 Before starting, read these files in order:
 1. .github/templates/workflow.md
 2. $ARGUMENTS/ticket.md
@@ -43,10 +59,20 @@ Execution steps (in order):
    - The full contents of $ARGUMENTS/plan.md
    - The full contents of .claude/skills/{domain}-build/SKILL.md
    - The specific steps the agent is responsible for
-   - Instruction: "Execute only the steps assigned to you. Check off each step in plan.md as you complete it. Do not modify ticket.md or the remote issue (GitHub issue or Jira issue)."
+   - A **Git strategy** block with the value collected above. Format it exactly like this so the agent's Git strategy rules pick it up:
+
+     ```
+     Git strategy: {branch-per-agent | main}
+     Ticket ID: {TICKET-ID}
+     Domain: {domain}
+     Base branch: {default-branch}
+     Branch name (if branch-per-agent): {TICKET-ID}/{domain}
+     ```
+
+   - Instruction: "Execute only the steps assigned to you. Check off each step in plan.md as you complete it. Do not modify ticket.md or the remote issue (GitHub issue or Jira issue). Follow the Git strategy block above exactly."
 
 4. Wait for all agents in the phase to complete before launching the next phase.
 
 5. After all phases complete, read plan.md and verify all steps are checked off. Report any unchecked steps as blockers.
 
-6. Report back: which agents ran, which phases completed, any failures or unchecked steps, and confirm the ticket is ready for `/vqa`.
+6. Report back: which agents ran, which phases completed, any failures or unchecked steps, any PR URLs opened by agents (if `branch-per-agent`) or the list of uncommitted file paths (if `main`), and confirm the ticket is ready for `/vqa`.

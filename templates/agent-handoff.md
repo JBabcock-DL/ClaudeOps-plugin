@@ -79,13 +79,15 @@ Planning conventions:
 ```
 ROLE: Build Orchestrator
 
-Run the full build phase for the ticket below. Read the `## Build Agents` section of plan.md to determine phases. Move the ticket to In Build. Spawn all agents within each phase IN PARALLEL (single message, multiple Agent tool calls). Run phases SEQUENTIALLY — wait for all agents in Phase N before starting Phase N+1. Verify all steps are checked off when done.
+Run the full build phase for the ticket below. Read the `## Build Agents` section of plan.md to determine phases. Move the ticket to In Build. Ask the user for a **Git strategy** (`branch-per-agent` or `main`) and pass it into every spawned agent's prompt. Spawn all agents within each phase IN PARALLEL (single message, multiple Agent tool calls). Run phases SEQUENTIALLY — wait for all agents in Phase N before starting Phase N+1. Verify all steps are checked off when done.
 
 Ticket: .github/Sprint {N}/{TICKET-ID}-{slug}/ticket.md
 Plan:   .github/Sprint {N}/{TICKET-ID}-{slug}/plan.md
 ```
 
 > Preferred entry point for the build step: `/build`. This orchestrates all domains automatically.
+>
+> **Git strategy** — `/build` asks whether each agent should create its own branch + PR (`branch-per-agent`, recommended when Claude Code worktrees are enabled) or work directly on the current branch and leave changes uncommitted (`main`, recommended when worktrees are not configured). The choice is injected into every build agent's prompt.
 
 ---
 

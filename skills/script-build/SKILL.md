@@ -18,6 +18,31 @@ If $ARGUMENTS is empty, ask the user using AskUserQuestion before proceeding:
 
 Do not proceed until confirmed.
 
+## Git strategy
+
+If the calling prompt already contains a `Git strategy:` block (you were spawned by `/build`), use those values verbatim and skip the question. Otherwise, ask the user using AskUserQuestion:
+
+- **Git strategy** — "How should this build agent handle git?"
+  - `branch-per-agent` — Create branch `{TICKET-ID}/scripts`, commit your work, push, and open a PR. Requires Claude Code worktrees if multiple build agents run in parallel.
+  - `main` — Work on the current branch, leave changes uncommitted for the user to review. No branch, no PR.
+
+Resolve the values you need:
+- **Ticket ID** — the `{TICKET-ID}` portion of the ticket folder (e.g. `WO-001`)
+- **Base branch** — `gh repo view --json defaultBranchRef -q .defaultBranchRef.name`, falling back to the current branch
+- **Branch name** — `{TICKET-ID}/scripts` when `branch-per-agent`
+
+Apply the strategy at the right moments:
+
+- **`branch-per-agent`:**
+  1. Before editing any files, run `git checkout -B {branch-name} {base-branch}` from a clean worktree.
+  2. After all assigned steps are checked off, stage, commit with `{TICKET-ID}: <one-line summary> (scripts)`, then `git push -u origin {branch-name}`.
+  3. Open a PR: `gh pr create --base {base-branch} --head {branch-name} --title "{TICKET-ID}: <summary> (scripts)" --body "Closes #{issue-number-from-ticket.md}. Part of {TICKET-ID}."`
+  4. Record the PR URL under Notes in plan.md and include it in your final report.
+- **`main`:**
+  1. Do NOT create a branch. Work on the current branch.
+  2. Do NOT commit or push. Leave changes on disk for the user to review.
+  3. In your final report, list every file path you created or modified so the user can stage them.
+
 Before writing any scripts, read these files in order:
 1. .github/templates/workflow.md
 2. $ARGUMENTS/ticket.md

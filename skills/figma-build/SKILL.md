@@ -18,6 +18,33 @@ If $ARGUMENTS is empty, ask the user using AskUserQuestion before proceeding:
 
 Do not proceed until confirmed.
 
+## Git strategy
+
+The primary deliverable lives in Figma, not git — but this agent still updates `plan.md` (checkoffs, Notes, node IDs). Apply the Git strategy to those repo changes.
+
+If the calling prompt already contains a `Git strategy:` block (you were spawned by `/build`), use those values verbatim and skip the question. Otherwise, ask the user using AskUserQuestion:
+
+- **Git strategy** — "How should this build agent handle git for plan.md updates?"
+  - `branch-per-agent` — Create branch `{TICKET-ID}/figma`, commit plan.md updates, push, and open a PR. Requires Claude Code worktrees if multiple build agents run in parallel.
+  - `main` — Work on the current branch, leave plan.md changes uncommitted for the user to review. No branch, no PR.
+
+Resolve the values you need:
+- **Ticket ID** — the `{TICKET-ID}` portion of the ticket folder (e.g. `WO-001`)
+- **Base branch** — `gh repo view --json defaultBranchRef -q .defaultBranchRef.name`, falling back to the current branch
+- **Branch name** — `{TICKET-ID}/figma` when `branch-per-agent`
+
+Apply the strategy at the right moments:
+
+- **`branch-per-agent`:**
+  1. Before editing plan.md, run `git checkout -B {branch-name} {base-branch}` from a clean worktree.
+  2. After all assigned steps are checked off, stage plan.md, commit with `{TICKET-ID}: <one-line summary> (figma)`, then `git push -u origin {branch-name}`.
+  3. Open a PR: `gh pr create --base {base-branch} --head {branch-name} --title "{TICKET-ID}: <summary> (figma)" --body "Closes #{issue-number-from-ticket.md}. Figma work for {TICKET-ID}. See Notes in plan.md for file URL and node IDs."`
+  4. Record the PR URL under Notes in plan.md and include it in your final report.
+- **`main`:**
+  1. Do NOT create a branch. Work on the current branch.
+  2. Do NOT commit or push. Leave plan.md changes on disk for the user to review.
+  3. In your final report, list the Figma file URL, the node IDs created/modified, and note that plan.md is uncommitted.
+
 Before touching Figma, read these files in order:
 1. .github/templates/workflow.md
 2. $ARGUMENTS/ticket.md
