@@ -21,7 +21,7 @@ If neither maps cleanly, ask the user using AskUserQuestion which mode they want
   1. **Create a new ticket** — bug, work order, or context
   2. **Promote a context ticket** — convert a CTX-### into a bug or work-order
 
-Before doing anything, read `.github/templates/workflow.md`. From it, read the **Backend:** field under **## Ticket Backend**. Record it as `BACKEND` with value `github` or `jira`. If the **Backend:** placeholder is still unresolved (`[CONFIGURE: github | jira]`), stop and tell the user to finish `/project-start` first.
+Before doing anything, read `memory.md` in the repo root if it exists, then read `.github/templates/workflow.md`. From workflow.md, read the **Backend:** field under **## Ticket Backend**. Record it as `BACKEND` with value `github` or `jira`. If the **Backend:** placeholder is still unresolved (`[CONFIGURE: github | jira]`), stop and tell the user to finish `/project-start` first. If this run revealed a durable fact for **Quick reference** (e.g. confirmed backend quirks), update `memory.md` — per `CLAUDE.md` in the repo root if present, without the user having to ask.
 
 ---
 

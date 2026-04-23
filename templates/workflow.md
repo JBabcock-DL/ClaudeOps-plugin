@@ -22,18 +22,28 @@ Exactly one of the two **Ticket Tracker** sections below applies, based on the b
 ## Repository Structure
 
 ```
+CLAUDE.md                  # Created by /project-start — instructs agents to read/update memory.md without user prompting
+memory.md                  # Short running memory to save agent context (see Conventions)
 .github/
-├── templates/               # Ticket templates and agent workflow context
-│   ├── workflow.md          # This file — agent context document
-│   ├── bug_report.md        # Template for bug tickets
-│   └── work_order.md        # Template for feature/work order tickets
-└── Sprint {N}/              # One folder per sprint
+├── templates/             # Ticket templates and agent workflow context
+│   ├── workflow.md        # This file — agent context document
+│   ├── bug_report.md      # Template for bug tickets
+│   ├── work_order.md      # Template for work order tickets
+│   ├── context.md         # Template for context tickets
+│   └── agent-handoff.md   # Prompt block for new agent sessions
+└── Sprint {N}/            # One folder per sprint
     └── {TICKET-ID}-{slug}/  # One folder per ticket (BUG-###, WO-###, or CTX-###)
         ├── ticket.md        # The ticket definition (synced to the backend)
         ├── plan.md          # Implementation approach and step checklist (not created for CTX tickets until promoted)
         ├── research/        # Data, findings, reference docs (.md, .json, etc.)
         └── scripts/         # Any automation, tooling, or helper scripts
 ```
+
+### memory.md and CLAUDE.md (recommended)
+
+- **`CLAUDE.md`** at the repository root (created by `/project-start`) tells Claude to **read `memory.md` first** and **update it** when durable facts change—**the user should not have to repeat those instructions.** Keep the **Agent rules** block when editing that file.
+- **`memory.md`** holds short, project-level facts: backend choice, default branch, stack, build/git defaults, naming conventions, integration pointers, and “do not repeat” notes. Read it at session start, then `workflow.md` for the full spec. This keeps sessions cheaper on context and tokens.
+- `ticket.md` / `plan.md` remain the source of truth for a single unit of work; do not duplicate per-ticket steps into `memory.md`.
 
 ---
 
@@ -238,6 +248,7 @@ Use when a work order involves:
 
 ## Conventions
 
+- `CLAUDE.md` at the repository root (from `/project-start`) must keep its **Agent rules** so Claude reads and updates `memory.md` without the user asking. **`memory.md`** holds short, project-wide facts; update it when something stable and reusable changes. Do not use either file to replace `ticket.md` or `plan.md` for a specific ticket
 - Ticket IDs are sequential per type (`BUG-001`, `BUG-002`, `WO-001`, `WO-002`, `CTX-001`, `CTX-002`) and are always prefixed onto the remote issue title
 - When a `CTX-###` ticket is promoted, the folder is renamed to the next `BUG-###` or `WO-###` in sequence, the ticket body is re-templated, and the remote issue is relabeled / retyped in place. The ticket.md frontmatter records `promoted_from: CTX-###` so history is preserved.
 - Sprint folders are named `Sprint {N}` — do not use dates

@@ -34,9 +34,10 @@ Capture these values too — you will need them for agent prompts and for the fi
 Do not proceed until the strategy is confirmed.
 
 Before starting, read these files in order:
-1. .github/templates/workflow.md
-2. $ARGUMENTS/ticket.md
-3. $ARGUMENTS/plan.md
+1. memory.md (if it exists in the repo root) — project running memory; skip if missing or empty
+2. .github/templates/workflow.md
+3. $ARGUMENTS/ticket.md
+4. $ARGUMENTS/plan.md
 
 **CTX guard.** If the resolved ticket folder name matches `CTX-*`, stop immediately and tell the user: "Build cannot run on a context ticket — promote it first with `/create-ticket promote {CTX-ID}` or run `/create-backlog`."
 

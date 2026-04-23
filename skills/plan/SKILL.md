@@ -18,10 +18,11 @@ If $ARGUMENTS is empty, ask the user using AskUserQuestion before proceeding:
 Do not proceed until confirmed.
 
 Before planning anything, read these files in order:
-1. .github/templates/workflow.md
-2. $ARGUMENTS/ticket.md
-3. $ARGUMENTS/plan.md (if it exists — note whether it is a stub or already has steps)
-4. Any files in $ARGUMENTS/research/ if they exist
+1. memory.md (if it exists in the repo root) — project running memory; skip if missing or empty
+2. .github/templates/workflow.md
+3. $ARGUMENTS/ticket.md
+4. $ARGUMENTS/plan.md (if it exists — note whether it is a stub or already has steps)
+5. Any files in $ARGUMENTS/research/ if they exist
 
 **CTX guard.** If the resolved ticket folder name matches `CTX-*`, stop immediately and tell the user: "Plans are only written against `bug` or `work-order` tickets. Promote this context ticket first with `/create-ticket promote {CTX-ID}` or run `/create-backlog`."
 

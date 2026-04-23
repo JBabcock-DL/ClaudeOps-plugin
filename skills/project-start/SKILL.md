@@ -30,8 +30,8 @@ Do not proceed until all three values (name, goal, backend) are confirmed.
 
 Record the chosen backend as the variable `BACKEND` with value `github` or `jira` for the rest of this skill. You will use it to branch steps 5 and 6 below.
 
-Read this file first to understand the full system you are replicating:
-.github/templates/workflow.md
+If `memory.md` already exists in the current working directory (e.g. resuming a partial setup), read it first, then read:
+.github/templates/workflow.md — to understand the full system you are replicating
 
 Then scaffold the following in the current working directory:
 
@@ -53,6 +53,8 @@ Then scaffold the following in the current working directory:
    - .claude/skills/vqa/
 
 2. Copy all template files from .github/templates/ into the new project's .github/templates/ — the full set is `workflow.md`, `bug_report.md`, `work_order.md`, `context.md`, and `agent-handoff.md`. Confirm all five files land in the new repo.
+
+2b. Copy `memory.md` from the claude-ops plugin **package root** (the directory that contains this skill's `skills/`, `templates/`, and `README.md` — the same place you are copying from, not from `.github/templates/`) into the **new repository root** as `memory.md`. The shipped plugin includes this file; always place it in new scaffolds so sessions can keep short project facts and save context and tokens.
 
 3. Copy all skill SKILL.md files from .claude/skills/ into the new project's .claude/skills/
 
@@ -77,11 +79,29 @@ Then scaffold the following in the current working directory:
      }
      ```
 
-4. Create a CLAUDE.md in the repo root with:
-   - Project name
-   - Chosen ticket backend (`github` or `jira`)
-   - Pointer to .github/templates/workflow.md as the source of truth
-   - Note that skills are available in .claude/skills/
+4. Create a `CLAUDE.md` in the new repo root. The user must not need to remind Claude to read `memory.md`—bake the rules in here. Use this exact structure, substituting the project name and `BACKEND`:
+
+   ```markdown
+   # {PROJECT_NAME}
+
+   **Ticket backend:** {BACKEND} (IDs, commands, and phase mapping live in `memory.md` Quick reference and `.github/templates/workflow.md`.)
+
+   ## Agent rules (claude-ops) — do not require the user to ask
+
+   1. If `memory.md` exists in this repository root, read it at the start of any ticket- or workflow-related work, then read `.github/templates/workflow.md` for the full spec.
+   2. Update `memory.md` when you establish or change something durable: backend facts, default git strategy, team conventions, MCP/tool setup, or recurring mistakes to avoid. Keep entries short. Never replace per-ticket `plan.md` or `ticket.md` with `memory.md`.
+   3. Workflow skills are in `.claude/skills/`. Use the slash commands from your README (e.g. `create-ticket`, `create-backlog`, `research`, `plan`, `build`, `vqa`).
+
+   ## Where to look
+
+   - `memory.md` — short cross-ticket running memory
+   - `.github/templates/workflow.md` — structure, ticket lifecycle, GitHub or Jira keys, commands
+   - `.github/templates/agent-handoff.md` — copy-paste prompt for new agent sessions
+   ```
+
+   Replace `{PROJECT_NAME}` with the project name from `$ARGUMENTS` and `{BACKEND}` with `github` or `jira` from the user's choice. Do not omit the **Agent rules** section.
+
+4b. **Prime `memory.md`** in the new repo root: set **Quick reference** (project one-liner, `BACKEND`, default branch) and **This repo is:** to match the new project, so the first real session can read a filled `memory.md` without manual user instructions.
 
 ---
 
@@ -231,6 +251,7 @@ Wait for it to complete. All three tickets must appear in `.github/Sprint 1/` wi
 ## 8. Report back
 
 - Folder structure created
+- `CLAUDE.md` written with **Agent rules** (read/update `memory.md` without user prompting) and `memory.md` primed per step 4b
 - Chosen backend (`github` or `jira`)
 - **If GitHub:** labels created (`bug`, `work-order`, `context`), project board name, number, and node id, and the status field + option IDs written into workflow.md
 - **If Jira:** cloud ID, site URL, Jira project key + name, and the bug / work-order / context issue-type mappings written into workflow.md

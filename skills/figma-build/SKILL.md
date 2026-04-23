@@ -46,9 +46,10 @@ Apply the strategy at the right moments:
   3. In your final report, list the Figma file URL, the node IDs created/modified, and note that plan.md is uncommitted.
 
 Before touching Figma, read these files in order:
-1. .github/templates/workflow.md
-2. $ARGUMENTS/ticket.md
-3. $ARGUMENTS/plan.md
+1. memory.md (if it exists in the repo root) — project running memory; skip if missing or empty
+2. .github/templates/workflow.md
+3. $ARGUMENTS/ticket.md
+4. $ARGUMENTS/plan.md
 
 Rules:
 - Do not modify ticket.md or the remote issue (GitHub or Jira) — your job is Figma work only

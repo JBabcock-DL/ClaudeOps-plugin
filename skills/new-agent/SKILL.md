@@ -10,9 +10,11 @@ You are ramping up a new agent session on this project using the claude-ops hand
 
 Arguments received: $ARGUMENTS
 
-Before doing anything else, read:
-1. .github/templates/workflow.md
-2. .github/templates/agent-handoff.md
+Before doing anything else, read (Claude: do not require the user to say “read memory” — it is your job):
+1. memory.md (if it exists in the repo root) — project running memory; skip if missing or empty
+2. .github/templates/workflow.md
+3. .github/templates/agent-handoff.md
+4. CLAUDE.md in the repo root if present (reiterates read/update rules for `memory.md`)
 
 ---
 

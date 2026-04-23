@@ -44,10 +44,11 @@ Apply the strategy at the right moments:
   3. In your final report, list every file path you created or modified so the user can stage them.
 
 Before writing any code, read these files in order:
-1. .github/templates/workflow.md
-2. $ARGUMENTS/ticket.md
-3. $ARGUMENTS/plan.md
-4. Any files in $ARGUMENTS/research/ if they exist
+1. memory.md (if it exists in the repo root) — project running memory; skip if missing or empty
+2. .github/templates/workflow.md
+3. $ARGUMENTS/ticket.md
+4. $ARGUMENTS/plan.md
+5. Any files in $ARGUMENTS/research/ if they exist
 
 Rules:
 - Do not start if plan.md has no steps defined — report back that the plan needs to be written first

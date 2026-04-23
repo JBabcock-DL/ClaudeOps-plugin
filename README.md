@@ -68,7 +68,7 @@ Then the agent will:
 
 1. Scaffold the `.github/` folder structure and sprint layout
 2. Copy all workflow templates and skill files into the repo
-3. Create a `CLAUDE.md` at the repo root
+3. Create `CLAUDE.md` and `memory.md` at the repo root — `CLAUDE.md` encodes the rule that agents read and update `memory.md` so the user does not have to ask each session
 
 Then, depending on the backend you chose:
 
@@ -127,3 +127,5 @@ create-ticket (bug | wo) → research (optional) → plan → build → vqa
 Each ticket lives in `.github/Sprint {N}/{TICKET-ID}-{slug}/` with a `ticket.md`, `plan.md`, and optional `research/` and `scripts/` folders. All tickets are linked to a remote issue — a GitHub Issue tracked on the Project board, or a Jira issue labeled with a `phase:*` label and `claude-ops`.
 
 See `.github/templates/workflow.md` (written into your repo by `/project-start`) for the full agent context document, including the chosen backend, board / project IDs, status (or label) configuration, and key commands / MCP tools.
+
+The repo root **`memory.md`** (from `/project-start`) holds durable project facts. **`CLAUDE.md`** (also from `/project-start`) tells agents to read and update `memory.md` automatically—users should not have to ask each session. In this **plugin** repo, the same two files at the project root document plugin behavior. Keep `memory.md` brief; use per-ticket `plan.md` for work-in-progress detail.

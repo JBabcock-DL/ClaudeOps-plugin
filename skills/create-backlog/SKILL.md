@@ -16,7 +16,7 @@ You will walk every `CTX-*` ticket that has not yet been promoted, classify it w
 
 ## Step 1 — Establish scope
 
-Before doing anything, read `.github/templates/workflow.md` and record the **Backend:** value. If it is still the unresolved `[CONFIGURE: github | jira]` placeholder, stop and tell the user to finish `/project-start` first.
+Before doing anything, read `memory.md` in the repo root if it exists, then read `.github/templates/workflow.md` and record the **Backend:** value. If it is still the unresolved `[CONFIGURE: github | jira]` placeholder, stop and tell the user to finish `/project-start` first. After triage, update `memory.md` if you recorded any new team-wide pattern worth persisting (per `CLAUDE.md` Agent rules if present).
 
 Parse $ARGUMENTS for a sprint number. If none provided, AskUserQuestion:
 

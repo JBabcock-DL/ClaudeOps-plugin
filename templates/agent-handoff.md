@@ -11,12 +11,14 @@ You are working on the claude-ops project. Tickets sync to either GitHub (Issues
 
 Before doing anything else, read these files in order:
 
+  0. memory.md (if it exists)          ← short running memory at repo root: backend, stack, conventions — read first; `CLAUDE.md` already instructs you to do this, but read the file for content
+  0a. CLAUDE.md (if it exists)        ← restates the same mandatory read/update rules; optional if you already read `memory.md` in full
   1. .github/templates/workflow.md     ← project structure, conventions, IDs, backend selection, and full ticket lifecycle
   2. .github/templates/bug_report.md   ← use this when the task is a bug ticket
   3. .github/templates/work_order.md   ← use this when the task is a work order ticket
   4. .github/templates/context.md      ← use this when the task is a raw context dump awaiting triage
 
-These files are your source of truth. Do not proceed until you have read them.
+These files are your source of truth. Do not proceed until you have read them (step 0 is optional; skip if memory.md is missing or empty).
 
 ---
 
