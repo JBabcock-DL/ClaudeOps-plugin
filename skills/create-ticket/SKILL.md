@@ -48,29 +48,32 @@ If this run revealed a durable fact for **Quick reference** (e.g. confirmed back
 
 ## Mode A — Create
 
-### Backend requirement (before prompts or files)
+### Delegation context (when invoked by another skill)
 
-**Create mode** must sync to GitHub or Jira **before** any local sprint folder or **`ticket.md`** exists, so the repo never ends up with a lone `CTX-*` / `BUG-*` / `WO-*` tree while the backend is still unset.
+A calling skill (e.g. `/dev-handoff`) may set these variables to skip questions already answered upstream. When any are present, use the provided value and omit the corresponding AskUserQuestion.
 
-If **`BACKEND`** is not exactly **`github`** or **`jira`** (including when the value is still **`[CONFIGURE: github | jira]`**), **stop immediately**. Do not run AskUserQuestion for type/title, do not resolve sprint folders, and do not write **`ticket.md`**. Tell the user:
-
-- **`workflow.md`** is missing a real **Ticket Backend** (same rule as **`skills/conventions/01-plugin-root-and-templates.md`** and **`create-backlog`**).
-- Run **`/project-start`** in **`{REPO_ROOT}`**, or create/edit **`{REPO_ROOT}/.github/templates/workflow.md`** from the bundled **`templates/workflow.md`** and set **Backend** plus the active **Ticket Tracker** section (GitHub or Jira) with real IDs.
-- Re-run **`/create-ticket`** after that — the skill will create the **remote** issue first, then the local folder.
+| Variable | Meaning | Skips |
+|---|---|---|
+| **`DELEGATED_TYPE`** | `ctx \| wo \| bug` | Type question |
+| **`DELEGATED_TITLE`** | Ticket title string | Title question |
+| **`DELEGATED_BODY`** | Pre-composed markdown body | “Additional information” prompt + body composition |
+| **`DELEGATED_BACKEND`** | `github \| jira` | `workflow.md` Backend read — use directly |
 
 ### Collect missing context (order matters)
 
-Parse $ARGUMENTS for ticket type ($0) and title ($1). For any value not provided, ask the user using AskUserQuestion **in this order** — do not collect long-form or “extra detail for devs” before **Type** is known, because **Type** selects the template (`bug_report.md` vs `work_order.md` vs `context.md`) and drives where information belongs.
+Parse $ARGUMENTS for ticket type ($0) and title ($1). Use **`DELEGATED_TYPE`** / **`DELEGATED_TITLE`** if set. For any value still not provided, ask using AskUserQuestion **in this order** — do not collect long-form detail before **Type** is known, because **Type** selects the template and drives where information belongs.
 
-- **Type** — "What type of ticket is this?"
+- **Type** — “What type of ticket is this?”
   1. `bug` — a defect to fix
   2. `wo` — a work order (feature / enhancement / deliverable)
   3. `ctx` — raw context from a designer / researcher / meeting, to triage later
-- **Title** — "What is the ticket title?" (For `ctx` tickets, a loose summary is fine — this becomes the folder slug.)
+- **Title** — “What is the ticket title?” (For `ctx` tickets, a loose summary is fine — this becomes the folder slug.)
 
 Do not proceed until both values are confirmed.
 
 ### Optional: additional information for developers
+
+Skip this step entirely when **`DELEGATED_BODY`** is set — the body is already composed.
 
 **After** Type and Title are fixed, if the user has **not** already given a complete ticket body (e.g. via slash-command paste or upstream skill passing prose), ask **once** for any **additional** context for the people who will implement or triage the ticket. Fold the answer into the correct sections of the chosen template (e.g. **Notes for build agent**, **Additional Context**, **Raw Notes**, **Requirements** subsections) instead of front-loading a type-agnostic dump.
 
@@ -78,11 +81,28 @@ Upstream skills (e.g. `/dev-handoff` delegating here) must **choose ticket type 
 
 ### Read the template
 
+Skip this step when **`DELEGATED_BODY`** is set.
+
 Read the template that matches the ticket type (resolve basename per `skills/conventions/01-plugin-root-and-templates.md`):
 
 - `bug` → `bug_report.md`
 - `wo`  → `work_order.md`
 - `ctx` → `context.md`
+
+### Backend check (before remote sync)
+
+Resolve **`BACKEND`**:
+
+1. If **`DELEGATED_BACKEND`** is set, use it directly — skip `workflow.md` read.
+2. Otherwise read the **Backend:** field from the resolved `workflow.md` (plugin bundled copy is always the fallback; a missing consumer-repo `workflow.md` is **never** an error here).
+
+If **`BACKEND`** is not exactly **`github`** or **`jira`** (including `[CONFIGURE: github | jira]`), **stop here**. Tell the user in one clear message:
+
+- The **Ticket Backend** in `workflow.md` is not yet configured.
+- Run **`/project-start`** in **`{REPO_ROOT}`**, or edit **`{REPO_ROOT}/.github/templates/workflow.md`** and set **Backend** plus the active **Ticket Tracker** section with real IDs.
+- The type (**`{type}`**), title (**`"{title}"`**), and any notes collected so far are **not** lost — re-run **`/create-ticket {type} "{title}"`** after configuring the backend.
+
+Do **not** create the sprint folder, `ticket.md`, or any local files before this check passes.
 
 ### Invocation
 
@@ -100,7 +120,7 @@ Do **not** create the sprint folder or write **`ticket.md`** until **after** the
    - `wo`  → `WO-{N}`
    - `ctx` → `CTX-{N}`
 2. Generate the ticket slug from the title (lowercase, hyphenated, max 5 words).
-3. **Compose the ticket body** (everything below the YAML frontmatter) as you would for **`ticket.md`** — but keep it **in memory only** until you write **`ticket.md`** in step 6:
+3. **Compose the ticket body** — use **`DELEGATED_BODY`** verbatim when set (skip composition). Otherwise compose in memory only until step 6:
    - For `bug` and `wo`: populate Requirements / Success Criteria / etc. as best you can from the title; leave sections the user should fill in marked with TODO checkboxes.
    - For `ctx`: use **`context.md`**. It includes a **design-handoff scaffold** (Goal, Design reference, Requirements, Acceptance criteria, …). When the intake is a **structured design→engineering handoff** (e.g. `/dev-handoff`, Figma MCP, explicit user choice), **populate that scaffold by default** from the design source — include Requirements and Acceptance criteria when they are grounded in the frame/spec; do not strip them. When the intake is **unstructured** (meetings, transcripts), keep Requirements / Acceptance criteria minimal or `TBD` and rely on Source / Raw Notes — **do not invent** scoped requirements the source material does not support. The user (or `/create-backlog`) completes or trims sections before promotion.
    - This body string (no frontmatter) is what you pass to **`gh issue create --body`** or to the Jira issue description.
