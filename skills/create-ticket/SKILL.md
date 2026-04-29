@@ -72,7 +72,7 @@ Use whichever shape your runtime exposes:
 3. Create the folder: `.github/Sprint {N}/{TICKET-ID}-{slug}/`
 4. Write `ticket.md` using the correct template.
    - For `bug` and `wo`: populate Requirements / Success Criteria / etc. as best you can from the title; leave sections the user should fill in marked with TODO checkboxes.
-   - For `ctx`: keep the dump-friendly structure; do NOT invent Requirements / Success Criteria. The user (or `/create-backlog`) will fill in Raw Notes, Source, and Assets & Links.
+   - For `ctx`: use **`context.md`**. It includes a **design-handoff scaffold** (Goal, Design reference, Requirements, Acceptance criteria, …). When the intake is a **structured design→engineering handoff** (e.g. `/dev-handoff`, Figma MCP, explicit user choice), **populate that scaffold by default** from the design source — include Requirements and Acceptance criteria when they are grounded in the frame/spec; do not strip them. When the intake is **unstructured** (meetings, transcripts), keep Requirements / Acceptance criteria minimal or `TBD` and rely on Source / Raw Notes — **do not invent** scoped requirements the source material does not support. The user (or `/create-backlog`) completes or trims sections before promotion.
    - Frontmatter by backend:
      - **GitHub:** `github_issue: TBD`, `project_item_id: TBD`, plus `type: {bug|work-order|context}`
      - **Jira:** `jira_issue: TBD`, `jira_issue_id: TBD`, plus `type: {bug|work-order|context}`
@@ -154,7 +154,8 @@ Also AskUserQuestion for a **clean title**:
 2. Generate a new slug from the (possibly refined) title.
 3. Rename the folder: `.github/Sprint {N}/CTX-###-{old-slug}/` → `.github/Sprint {N}/{BUG|WO}-###-{new-slug}/`.
 4. Replace the body of `ticket.md` with the correct template (`bug_report.md` or `work_order.md`) using **`skills/conventions/01-plugin-root-and-templates.md`**, **migrating the salient content** from the CTX body:
-   - **Source** and **Raw Notes** → merged into **Additional Context** (bug) or the top of **Problem Story** / **Hypothesis** (work order).
+   - **Goal**, **Design reference**, **Requirements** (all subsections), **Acceptance criteria**, **Out of scope**, and **Notes for build agent** — when present (design-handoff `context.md`), map into **Requirements** / **Success Criteria** / **References** as appropriate for the target template; do not drop actionable bullets.
+   - **Source** and **Raw Notes** → merged into **Additional Context** (bug) or the top of **Problem Story** / **Hypothesis** (work order), unless already folded into Requirements above.
    - **Observed Problems / Opportunities** → seed entries for **Requirements**.
    - **Assets & Links** → **References**.
    - **Related Tickets** → **References**.

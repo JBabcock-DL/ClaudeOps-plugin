@@ -37,8 +37,10 @@ For each unpromoted CTX ticket, load its `ticket.md` and extract:
 
 - Ticket ID (`CTX-###`) and current slug
 - Current title (from the first heading or frontmatter)
+- **Goal** section (if present — common for **design-handoff** `context.md` fills)
 - **Source** section
 - **Summary** section
+- **Design reference** / **Requirements** / **Acceptance criteria** — skim for scope when present (structured handoffs); otherwise skip
 - **Raw Notes** section
 - **Observed Problems / Opportunities** section
 - **Proposed Ticket Type** — which of `bug`, `work-order`, `unknown` the author checked (may be none)

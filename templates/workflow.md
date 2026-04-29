@@ -53,13 +53,15 @@ memory.md                  # Short running memory to save agent context (see Con
 |---|---|---|---|---|
 | Bug | `bug` | `bug_report.md` | `BUG-{N}-{slug}` | Full lifecycle (create → research → plan → build → vqa) |
 | Work Order | `work-order` | `work_order.md` | `WO-{N}-{slug}` | Full lifecycle (create → research → plan → build → vqa) |
-| Context | `context` | `context.md` | `CTX-{N}-{slug}` | Triage-only — holding pen for raw notes / design context; must be promoted to `bug` or `work-order` before research / planning / building |
+| Context | `context` | `context.md` | `CTX-{N}-{slug}` | Triage — raw dumps **or** design-handoff scaffold; must be promoted to `bug` or `work-order` before research / planning / building |
 
 Each type has its own sequential numbering (`BUG-001`, `BUG-002`, `WO-001`, `CTX-001`, etc.).
 
 ### Context tickets
 
-Context tickets are an intake format for **bulk raw information** — designer notes, research transcripts, meeting dumps, Figma comments, Slack threads, customer interviews, analytics observations. They intentionally skip the Requirements / Success Criteria structure of bug and work-order tickets so nothing blocks people (or agents) from dropping context in quickly.
+Context tickets are an intake format for **bulk raw information** — designer notes, research transcripts, meeting dumps, Figma comments, Slack threads, customer interviews, analytics observations.
+
+**`context.md` ships two intake shapes:** (1) **Design handoff (default scaffold)** — Goal, Design reference, Requirements (functional / visual / technical), Acceptance criteria, Out of scope, and Notes for build agent — use this when dropping **Figma → engineering** work or running `/dev-handoff` so a build agent can scope a task **before** promotion. (2) **Raw dump** — lean on Source, Summary, Raw Notes, and Assets & Links; leave structured sections empty or `TBD` when no UI/code scope exists yet. Bug and work-order tickets still use **`bug_report.md`** / **`work_order.md`** for fully structured Requirements / Success Criteria **after** promotion.
 
 A context ticket stays in **Context Backlog** until it is **promoted** into the correct type:
 - `/create-ticket promote {CTX-ID}` — interactively promote a single CTX ticket into a `bug` or `work-order`
