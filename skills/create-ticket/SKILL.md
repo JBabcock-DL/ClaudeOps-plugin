@@ -31,7 +31,14 @@ Resolve **`workflow.md`**, **`bug_report.md`**, **`work_order.md`**, and **`cont
 
 ---
 
-Before doing anything else, read **`{REPO_ROOT}/memory.md`** if it exists, then load **`workflow.md`** via that convention.
+Before doing anything else, read **`{REPO_ROOT}/memory.md`** if it exists.
+
+Then resolve and read **`workflow.md`** using the convention in **`skills/conventions/01-plugin-root-and-templates.md`**:
+
+- Prefer **`{REPO_ROOT}/.github/templates/workflow.md`** when it exists
+- Otherwise fall back to the bundled plugin copy at **`{PLUGIN_ROOT}/templates/workflow.md`**
+
+Missing repo-local `workflow.md` is **never** an error for `create-ticket`.
 
 From the resolved **`workflow.md`**, read the **Backend:** field under **## Ticket Backend**.
 
