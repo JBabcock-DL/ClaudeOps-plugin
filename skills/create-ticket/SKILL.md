@@ -31,7 +31,30 @@ Resolve **`workflow.md`**, **`bug_report.md`**, **`work_order.md`**, and **`cont
 
 ---
 
-Before doing anything else, read **`{REPO_ROOT}/memory.md`** if it exists, then load **`workflow.md`** via that convention. From **`workflow.md`**, read the **Backend:** field under **## Ticket Backend**. Record it as **`BACKEND`** with value **`github`** or **`jira`**. If the **Backend:** placeholder is still unresolved (`[CONFIGURE: github | jira]`), stop and tell the user to finish **`/project-start`** in **`REPO_ROOT`** (or to edit **`workflow.md`** so **Backend** is set — bundled **`templates/workflow.md`** ships unresolved placeholders until configured). If this run revealed a durable fact for **Quick reference** (e.g. confirmed backend quirks), update **`memory.md`** — per **`CLAUDE.md`** in **`REPO_ROOT`** if present, without the user having to ask.
+Before doing anything else, read **`{REPO_ROOT}/memory.md`** if it exists, then load **`workflow.md`** via that convention.
+
+From the resolved **`workflow.md`**, read the **Backend:** field under **## Ticket Backend**.
+
+- If **Backend** is set to `github` or `jira`, record it as **`BACKEND`** and continue.
+- If **Backend** is still the placeholder (`[CONFIGURE: github | jira]`) or the resolved `workflow.md` is the bundled plugin template, do **not** fail. Instead enter **LOCAL-ONLY mode**:
+  - Create/update the local ticket folder and files as normal.
+  - Skip remote sync (GitHub/Jira) for this run.
+  - Offer to **scaffold a repo-local workflow file** so future runs can sync automatically (see “Optional: scaffold workflow.md” below).
+
+If this run revealed a durable fact for **Quick reference** (e.g. confirmed backend quirks), update **`memory.md`** — per **`CLAUDE.md`** in **`REPO_ROOT`** if present, without the user having to ask.
+
+### Optional: scaffold workflow.md (so future runs sync)
+
+If **`{REPO_ROOT}/.github/templates/workflow.md`** is missing or still unconfigured, offer a one-time setup path:
+
+1. Ask which backend the repo will use (`github` or `jira`).
+2. Create **`{REPO_ROOT}/.github/templates/workflow.md`** by copying the bundled plugin `templates/workflow.md`.
+3. Edit the copied file to:
+   - Set **`## Project Goal`** from the user (one line is fine).
+   - Set **`## Ticket Backend` → Backend** to the chosen backend.
+   - Mark the unused tracker section as **N/A** (per the instructions already in the template).
+
+If the user declines scaffolding, proceed in LOCAL-ONLY mode for this run.
 
 ---
 
@@ -88,7 +111,9 @@ Use whichever shape your runtime exposes:
 
 ### Sync to the remote backend
 
-Execute **only** the branch matching `BACKEND`. The label / issue-type for the new issue is determined by the ticket type:
+If this run is in **LOCAL-ONLY mode** (Backend unresolved or repo not yet configured), **skip all remote sync steps** below. Leave remote frontmatter fields as `TBD` and report that the ticket was created locally only.
+
+Otherwise, execute **only** the branch matching `BACKEND`. The label / issue-type for the new issue is determined by the ticket type:
 
 | Ticket type | Label | Jira issue-type source in workflow.md |
 |---|---|---|
@@ -122,9 +147,10 @@ All Jira work goes through the **Atlassian MCP server**. Before calling any MCP 
 
 - Ticket folder path
 - Ticket type, ID, and title
-- Backend used
+- Backend used (or **LOCAL-ONLY** if unconfigured)
 - **If GitHub:** the GitHub issue URL and the project item ID
 - **If Jira:** the Jira issue key, the full Jira URL (`<siteUrl>/browse/<KEY>`), and the labels applied
+- **If LOCAL-ONLY:** what file is missing/unconfigured (usually `{REPO_ROOT}/.github/templates/workflow.md`) and offer the “Optional: scaffold workflow.md” setup path
 - If `ctx`: remind the user that this ticket is in intake and must be promoted via `/create-ticket promote {CTX-ID}` or `/create-backlog` before research / plan / build / vqa will run on it.
 
 ---
