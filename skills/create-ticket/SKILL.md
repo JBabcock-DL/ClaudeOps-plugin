@@ -135,7 +135,40 @@ Do **not** create the sprint folder or write **`ticket.md`** until **after** the
 3. **Compose the ticket body** — use **`DELEGATED_BODY`** verbatim when set (skip composition). Otherwise compose in memory only until step 6:
    - For `bug` and `wo`: populate Requirements / Success Criteria / etc. as best you can from the title; leave sections the user should fill in marked with TODO checkboxes.
    - For `ctx`: use **`context.md`**. It includes a **design-handoff scaffold** (Goal, Design reference, Requirements, Acceptance criteria, …). When the intake is a **structured design→engineering handoff** (e.g. `/dev-handoff`, Figma MCP, explicit user choice), **populate that scaffold by default** from the design source — include Requirements and Acceptance criteria when they are grounded in the frame/spec; do not strip them. When the intake is **unstructured** (meetings, transcripts), keep Requirements / Acceptance criteria minimal or `TBD` and rely on Source / Raw Notes — **do not invent** scoped requirements the source material does not support. The user (or `/create-backlog`) completes or trims sections before promotion.
-   - This body string (no frontmatter) is what you pass to **`gh issue create --body`** or to the Jira issue description.
+
+     **`ctx` heading contract — structured design handoff (mandatory):** These exact heading strings must appear in this order. Any deviation (e.g., `## Functional` instead of `### Functional` under `## Requirements`, or three standalone `##` subsections instead of one `## Requirements` parent) makes the ticket non-conformant and breaks downstream promote flows:
+
+     | Heading | Level | Rule |
+     |---|---|---|
+     | `## Goal` | H2 | One focused paragraph — required |
+     | `## Design reference` | H2 | Table + screenshot line — required when design source is available |
+     | `## Requirements` | H2 | Parent heading only — no body text; subsections follow immediately |
+     | `### Functional` | H3 | Numbered requirements — required |
+     | `### Visual \| layout` | H3 | Token specs + layout — required |
+     | `### Technical` | H3 | Code Connect paths + a11y — required |
+     | `## Acceptance criteria` | H2 | Checkbox list — required |
+     | `## Out of scope` | H2 | Explicit exclusions — required |
+     | `## Notes for build agent` | H2 | File pointers + component API notes — required |
+
+     **Fidelity requirements when composing from a design source (Figma MCP, Code Connect hints):**
+     - **Functional copy:** Every TEXT node label, placeholder, helper, or CTA must appear as exact copy in a numbered requirement. Do not paraphrase.
+     - **Validation rules:** Write as testable statements (e.g. `Min 8 characters`, `Validate on blur`, `CTA disabled until valid + checkbox checked`) — not vague phrasing (`"typical submit guard"`, `"when in scope"`).
+     - **Token names:** Use exact `var(--token-name)` strings from the design source. Do not substitute generic descriptions (`"border token"`, `"purple button"`).
+     - **Code Connect props:** Name every Code Connect component target with its exact props (variant, size, leadingIcon, trailingIcon, etc.) — not just the component name.
+
+   - **One-body rule (mandatory, all ticket types):** The complete body goes into the `description` field of the remote issue in a single create call (or a follow-up `editJiraIssue` / `gh issue edit` if the first call needs adjustment). **Never** split content between a short description and a comment. One authoritative record: description only.
+
+**Pre-submit self-check — verify before step 4 (remote sync). If any item fails, fix it first:**
+
+For `ctx` tickets from a structured design source:
+- [ ] All scaffold headings match the heading contract exactly — no merged headings, no standalone `## Functional`
+- [ ] `## Requirements` is a parent H2 with three H3 subsections (`### Functional`, `### Visual | layout`, `### Technical`)
+- [ ] `### Functional` uses numbered requirements with exact copy from the design source — not paraphrased
+- [ ] `### Visual | layout` uses `var(--…)` token names — no generic color/spacing descriptions
+- [ ] `### Technical` names specific Code Connect components and their props explicitly
+
+For all ticket types:
+- [ ] All content is in the description field — nothing deferred to a comment or external doc not linked in the body
 
 4. **Sync to the remote backend first** — execute **only** the branch matching **`BACKEND`**. GitHub labels follow the ticket type. For Jira, **`issueTypeName`** comes **only** from **AskUserQuestion** whose options are **`availableIssueTypeNames`** from the **MCP fetch** — never from **`workflow.md`** issue-type lines.
 

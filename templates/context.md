@@ -51,7 +51,7 @@ Promotion (`/create-ticket promote` or `/create-backlog`) still moves salient co
 
 <!-- Numbered or bulleted: fields, validation rules, submit gates, navigation (terms links, sign-in), error behavior. -->
 
-### Visual / layout
+### Visual | layout
 
 <!-- Tokens, typography styles, spacing, responsive expectations — tie to variables when known (`--space-*`, `--radius-*`, …). -->
 
