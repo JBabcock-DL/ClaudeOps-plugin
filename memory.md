@@ -111,4 +111,5 @@ You **must** do this without the user having to ask:
 
 ## Changelog (optional)
 
+- *2026-04-29 — **`create-ticket`** (create mode): requires configured **`workflow.md`** Backend (no local-only scaffold); **remote issue first**, then local folder **`ticket.md`**. Aligns with **`create-backlog`** and **`01-plugin-root-and-templates.md`**.*
 - *2026-04-29 — Documented **`PLUGIN_ROOT`** / **`workflow.md`** resolution via **`skills/conventions/01-plugin-root-and-templates.md`**; removed reliance on machine-specific paths.*

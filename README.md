@@ -108,7 +108,7 @@ When it finishes, your repo is fully wired — tickets you create will sync to t
 |---|---|---|
 | `project-start` | `/project-start "Name"` | Scaffolds the workflow system in a new repo and wires it up to a GitHub Project board or a Jira project |
 | `new-agent` | `/new-agent` | Spins up a new agent session — collects sprint/ticket/role context, orients via the handoff doc, then invokes the right skill to start work |
-| `create-ticket` | `/create-ticket wo "Title"`, `/create-ticket bug "Title"`, or `/create-ticket ctx "Title"` — also `/create-ticket promote CTX-###` | Creates a ticket (bug / work order / context) locally and syncs it to the active backend. `promote` converts a context ticket into a bug or work-order in place. |
+| `create-ticket` | `/create-ticket wo "Title"`, `/create-ticket bug "Title"`, or `/create-ticket ctx "Title"` — also `/create-ticket promote CTX-###` | Creates the remote ticket first (GitHub or Jira), then the local sprint folder and `ticket.md` (requires configured `workflow.md`). `promote` converts a context ticket into a bug or work-order in place. |
 | `create-backlog` | `/create-backlog [sprint-number]` | Walks every unpromoted context ticket in a sprint, classifies each into a bug or work-order with the user's confirmation, and delegates to `create-ticket promote` to perform the mutation |
 | `research` | `/research` | Investigates a ticket's problem domain and writes findings to `research/` |
 | `plan` | `/plan` | Writes or refines `plan.md` using Claude's native plan mode |

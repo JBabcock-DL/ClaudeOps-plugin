@@ -74,7 +74,7 @@ The `/research`, `/plan`, `/build`, and `/vqa` skills refuse to run on an un-pro
 ## Ticket Lifecycle
 
 0. **Intake (optional)** — `/create-ticket ctx "..."` drops raw context into a CTX ticket without forcing structure. CTX tickets are triaged later via `/create-ticket promote {CTX-ID}` (single) or `/create-backlog` (batch), which converts each into a `bug` or `work-order` with the next sequential ID of that type.
-1. **Create ticket** — `/create-ticket` creates the folder, `ticket.md`, stub `plan.md` (bug / work-order only), remote issue, and syncs to the board (status: **Context Backlog**)
+1. **Create ticket** — `/create-ticket` requires a configured **Ticket Backend** in `workflow.md`, creates the **remote** issue first (GitHub Issue + Project, or Jira), then writes the sprint folder, `ticket.md`, and stub `plan.md` (bug / work-order only), with board/status: **Context Backlog**
 2. **Research** *(optional, recommended for unfamiliar work)* — `/research` investigates the problem domain and writes findings to `research/`; moves ticket to **In Research**
 3. **Plan** — `/plan` enters plan mode for interactive review, writes the approved plan to `plan.md` (including a `## Build Agents` section defining parallel phases), and moves ticket to **In Planning**
 4. **Build** — `/build` reads the `## Build Agents` section, moves ticket to **In Build**, and spawns build agents in parallel phases; agents within a phase run simultaneously, phases run sequentially. Individual build skills (`/code-build`, `/doc-build`, `/script-build`, `/api-build`, `/figma-build`) can be used directly for single-domain tickets.

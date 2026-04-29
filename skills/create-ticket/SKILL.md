@@ -1,6 +1,6 @@
 ---
 name: create-ticket
-description: Create a new bug, work order, or context ticket locally and sync it to the active ticket backend — or promote an existing context ticket into a bug / work-order. Use when creating a new ticket, dropping raw context, or converting a CTX ticket into a concrete unit of work.
+description: Create a new bug, work order, or context ticket in the active ticket backend (GitHub or Jira) first, then write the local sprint folder and ticket.md — or promote an existing context ticket into a bug / work-order. Use when creating a new ticket, dropping raw context, or converting a CTX ticket into a concrete unit of work.
 argument-hint: "[bug|wo|ctx|promote] [title-in-quotes | CTX-###]"
 context: fork
 agent: general-purpose
@@ -38,21 +38,25 @@ Then resolve and read **`workflow.md`** using the convention in **`skills/conven
 - Prefer **`{REPO_ROOT}/.github/templates/workflow.md`** when it exists
 - Otherwise fall back to the bundled plugin copy at **`{PLUGIN_ROOT}/templates/workflow.md`**
 
-Missing repo-local `workflow.md` is **never** an error for `create-ticket`.
+Missing repo-local `workflow.md` is fine — the bundled template is used — but an **unconfigured Backend** blocks **create mode** (see Mode A).
 
-From the resolved **`workflow.md`**, read the **Backend:** field under **## Ticket Backend**.
-
-- If **Backend** is set to `github` or `jira`, record it as **`BACKEND`** and continue.
-- If **Backend** is still the placeholder (`[CONFIGURE: github | jira]`) or the resolved `workflow.md` is the bundled plugin template, do **not** fail. Instead enter **LOCAL-ONLY mode**:
-  - Create/update the local ticket folder and files as normal.
-  - Skip remote sync (GitHub/Jira) for this run.
-  - Do **not** interrupt the ticket creation prompts. Defer any setup prompts until **after** the ticket is created (see “Optional: scaffold workflow.md” in Report back).
+From the resolved **`workflow.md`**, read the **Backend:** field under **## Ticket Backend** and normalize it (strip surrounding backticks or quotes). Record the result as **`BACKEND`** when it is exactly **`github`** or **`jira`**.
 
 If this run revealed a durable fact for **Quick reference** (e.g. confirmed backend quirks), update **`memory.md`** — per **`CLAUDE.md`** in **`REPO_ROOT`** if present, without the user having to ask.
 
 ---
 
 ## Mode A — Create
+
+### Backend requirement (before prompts or files)
+
+**Create mode** must sync to GitHub or Jira **before** any local sprint folder or **`ticket.md`** exists, so the repo never ends up with a lone `CTX-*` / `BUG-*` / `WO-*` tree while the backend is still unset.
+
+If **`BACKEND`** is not exactly **`github`** or **`jira`** (including when the value is still **`[CONFIGURE: github | jira]`**), **stop immediately**. Do not run AskUserQuestion for type/title, do not resolve sprint folders, and do not write **`ticket.md`**. Tell the user:
+
+- **`workflow.md`** is missing a real **Ticket Backend** (same rule as **`skills/conventions/01-plugin-root-and-templates.md`** and **`create-backlog`**).
+- Run **`/project-start`** in **`{REPO_ROOT}`**, or create/edit **`{REPO_ROOT}/.github/templates/workflow.md`** from the bundled **`templates/workflow.md`** and set **Backend** plus the active **Ticket Tracker** section (GitHub or Jira) with real IDs.
+- Re-run **`/create-ticket`** after that — the skill will create the **remote** issue first, then the local folder.
 
 ### Collect missing context (order matters)
 
@@ -89,25 +93,19 @@ Use whichever shape your runtime exposes:
 
 ### Execute the create flow
 
+Do **not** create the sprint folder or write **`ticket.md`** until **after** the remote issue exists and you have captured its IDs (steps 1–3 prepare content; step 4 is remote; steps 5–7 write local files).
+
 1. Determine the current sprint folder and the next sequential ticket ID for the chosen type by scanning `.github/Sprint */` for existing `BUG-*`, `WO-*`, or `CTX-*` folders. Each type has its own independent counter.
    - `bug` → `BUG-{N}`
    - `wo`  → `WO-{N}`
    - `ctx` → `CTX-{N}`
 2. Generate the ticket slug from the title (lowercase, hyphenated, max 5 words).
-3. Create the folder: `.github/Sprint {N}/{TICKET-ID}-{slug}/`
-4. Write `ticket.md` using the correct template.
+3. **Compose the ticket body** (everything below the YAML frontmatter) as you would for **`ticket.md`** — but keep it **in memory only** until you write **`ticket.md`** in step 6:
    - For `bug` and `wo`: populate Requirements / Success Criteria / etc. as best you can from the title; leave sections the user should fill in marked with TODO checkboxes.
    - For `ctx`: use **`context.md`**. It includes a **design-handoff scaffold** (Goal, Design reference, Requirements, Acceptance criteria, …). When the intake is a **structured design→engineering handoff** (e.g. `/dev-handoff`, Figma MCP, explicit user choice), **populate that scaffold by default** from the design source — include Requirements and Acceptance criteria when they are grounded in the frame/spec; do not strip them. When the intake is **unstructured** (meetings, transcripts), keep Requirements / Acceptance criteria minimal or `TBD` and rely on Source / Raw Notes — **do not invent** scoped requirements the source material does not support. The user (or `/create-backlog`) completes or trims sections before promotion.
-   - Frontmatter by backend:
-     - **GitHub:** `github_issue: TBD`, `project_item_id: TBD`, plus `type: {bug|work-order|context}`
-     - **Jira:** `jira_issue: TBD`, `jira_issue_id: TBD`, plus `type: {bug|work-order|context}`
-5. Write a stub `plan.md` **only for `bug` and `wo`**. For `ctx` tickets, do NOT create `plan.md` — planning is meaningless until the ticket is promoted.
+   - This body string (no frontmatter) is what you pass to **`gh issue create --body`** or to the Jira issue description.
 
-### Sync to the remote backend
-
-If this run is in **LOCAL-ONLY mode** (Backend unresolved or repo not yet configured), **skip all remote sync steps** below. Leave remote frontmatter fields as `TBD` and report that the ticket was created locally only.
-
-Otherwise, execute **only** the branch matching `BACKEND`. The label / issue-type for the new issue is determined by the ticket type:
+4. **Sync to the remote backend first** — execute **only** the branch matching `BACKEND`. The label / issue-type for the new issue is determined by the ticket type:
 
 | Ticket type | Label | Jira issue-type source in workflow.md |
 |---|---|---|
@@ -117,11 +115,10 @@ Otherwise, execute **only** the branch matching `BACKEND`. The label / issue-typ
 
 #### Backend: GitHub
 
-1. Create the GitHub issue using `gh` CLI with the correct label. The issue title must be prefixed with the ticket ID: `{TICKET-ID}: {title}` (e.g. `WO-001: Configure project goal in workflow.md`, `CTX-002: Designer dump for checkout flow`).
-2. Capture the issue number and update the `github_issue` field in `ticket.md`.
-3. Add the issue to the project board using the **project number** and **owner** from the **Ticket Tracker — GitHub** section of `workflow.md`; capture the returned project item ID (`PVTI_...`).
-4. Update the `project_item_id` field in `ticket.md` with the captured project item ID.
-5. Set the Status field to **Context Backlog** using the Project ID, status field ID, and Context Backlog option ID from `workflow.md` (same single-select mutation shown in the **Key Commands (GitHub)** block).
+1. Create the GitHub issue using `gh` CLI with the correct label. The issue title must be prefixed with the ticket ID: `{TICKET-ID}: {title}` (e.g. `WO-001: Configure project goal in workflow.md`, `CTX-002: Designer dump for checkout flow`). Use the composed body from step 3 as `--body`.
+2. Capture the issue number for frontmatter (`github_issue`).
+3. Add the issue to the project board using the **project number** and **owner** from the **Ticket Tracker — GitHub** section of `workflow.md`; capture the returned project item ID (`PVTI_...`) for `project_item_id`.
+4. Set the Status field to **Context Backlog** using the Project ID, status field ID, and Context Backlog option ID from `workflow.md` (same single-select mutation shown in the **Key Commands (GitHub)** block).
 
 #### Backend: Jira
 
@@ -133,32 +130,28 @@ All Jira work goes through the **Atlassian MCP server**. Before calling any MCP 
    - `claude-ops`
    - One of `bug`, `work-order`, or `context` (matching the type)
    - `phase:context-backlog`
-   Use the rendered ticket.md body (without frontmatter) as the issue description. Prefer plain text / wiki markup over ADF.
-3. Capture the returned `key` (e.g. `PROJ-123`) and `id` from the MCP response. Update the `jira_issue` and `jira_issue_id` frontmatter fields in `ticket.md` accordingly.
+   Use the composed body from step 3 as the issue description. Prefer plain text / wiki markup over ADF.
+3. Capture the returned `key` (e.g. `PROJ-123`) and `id` from the MCP response for `jira_issue` and `jira_issue_id` frontmatter.
 4. Do **not** transition the Jira Status field. Phase tracking is done entirely through the `phase:*` label set in step 2.
+
+### Write local files (after remote IDs exist)
+
+5. Create the folder: `.github/Sprint {N}/{TICKET-ID}-{slug}/`
+6. Write **`ticket.md`** with YAML frontmatter filled from the remote response, then the composed body from step 3:
+   - **GitHub:** `github_issue:`, `project_item_id:`, plus `type: {bug|work-order|context}`
+   - **Jira:** `jira_issue:`, `jira_issue_id:`, plus `type: {bug|work-order|context}`
+7. Write a stub **`plan.md`** **only for `bug` and `wo`**. For `ctx` tickets, do **not** create **`plan.md`** — planning is meaningless until the ticket is promoted.
+
+If the remote sync in step 4 fails, **do not** create the sprint folder or **`ticket.md`** (fix the backend / credentials / network, then re-run **`/create-ticket`**).
 
 ### Report back (create mode)
 
 - Ticket folder path
 - Ticket type, ID, and title
-- Backend used (or **LOCAL-ONLY** if unconfigured)
+- Backend used (`github` or `jira`)
 - **If GitHub:** the GitHub issue URL and the project item ID
 - **If Jira:** the Jira issue key, the full Jira URL (`<siteUrl>/browse/<KEY>`), and the labels applied
-- **If LOCAL-ONLY:** what file is missing/unconfigured (usually `{REPO_ROOT}/.github/templates/workflow.md`) and offer the **non-blocking** “Optional: scaffold workflow.md” setup path below (do not ask these setup questions until after the ticket has been created and reported)
 - If `ctx`: remind the user that this ticket is in intake and must be promoted via `/create-ticket promote {CTX-ID}` or `/create-backlog` before research / plan / build / vqa will run on it.
-
-### Optional: scaffold workflow.md (so future runs sync)
-
-Only do this **after** the ticket is successfully created (and after remote sync, if applicable). This setup must never block ticket creation.
-
-If **`{REPO_ROOT}/.github/templates/workflow.md`** is missing or still unconfigured:
-
-1. Ask which backend the repo will use (`github` or `jira`).
-2. Create **`{REPO_ROOT}/.github/templates/workflow.md`** by copying the bundled plugin `templates/workflow.md`.
-3. Edit the copied file to:
-   - Set **`## Project Goal`** from the user (one line is fine).
-   - Set **`## Ticket Backend` → Backend** to the chosen backend.
-   - Mark the unused tracker section as **N/A** (per the instructions already in the template).
 
 ---
 
@@ -206,7 +199,7 @@ Also AskUserQuestion for a **clean title**:
    - Keep the existing remote IDs (`github_issue` / `project_item_id`, or `jira_issue` / `jira_issue_id`) — the remote issue is not re-created.
    - Add `promoted_from: CTX-###`.
 6. Keep the old CTX **number reserved** — do not reuse `CTX-###` later. (Since we renamed the folder, no CTX-### folder will exist anymore; leave a tombstone in `.github/Sprint {N}/CTX-###-PROMOTED.md` containing a single line: `Promoted to {BUG|WO}-### on {YYYY-MM-DD}. See ./{new-folder}/ticket.md.`)
-7. Update the remote issue to reflect the new type and ID.
+7. Update the remote issue to reflect the new type and ID — **only if** **`BACKEND`** is **`github`** or **`jira`** (from **`workflow.md`**) **and** the ticket’s remote ID fields are not **`TBD`**. Otherwise **skip** the GitHub/Jira subsections below and report that the local promote finished without a remote update (configure **`workflow.md`** and real remote IDs before expecting the tracker to match).
 
 #### Backend: GitHub
 
