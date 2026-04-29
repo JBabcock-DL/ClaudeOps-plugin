@@ -37,15 +37,9 @@ Before doing anything else, read **`{REPO_ROOT}/memory.md`** if it exists, then 
 
 ## Mode A — Create
 
-Read the template that matches the ticket type (resolve basename per `skills/conventions/01-plugin-root-and-templates.md`):
+### Collect missing context (order matters)
 
-- `bug` → `bug_report.md`
-- `wo`  → `work_order.md`
-- `ctx` → `context.md`
-
-### Collect missing context
-
-Parse $ARGUMENTS for ticket type ($0) and title ($1). For any value not provided, ask the user using AskUserQuestion before proceeding:
+Parse $ARGUMENTS for ticket type ($0) and title ($1). For any value not provided, ask the user using AskUserQuestion **in this order** — do not collect long-form or “extra detail for devs” before **Type** is known, because **Type** selects the template (`bug_report.md` vs `work_order.md` vs `context.md`) and drives where information belongs.
 
 - **Type** — "What type of ticket is this?"
   1. `bug` — a defect to fix
@@ -54,6 +48,20 @@ Parse $ARGUMENTS for ticket type ($0) and title ($1). For any value not provided
 - **Title** — "What is the ticket title?" (For `ctx` tickets, a loose summary is fine — this becomes the folder slug.)
 
 Do not proceed until both values are confirmed.
+
+### Optional: additional information for developers
+
+**After** Type and Title are fixed, if the user has **not** already given a complete ticket body (e.g. via slash-command paste or upstream skill passing prose), ask **once** for any **additional** context for the people who will implement or triage the ticket. Fold the answer into the correct sections of the chosen template (e.g. **Notes for build agent**, **Additional Context**, **Raw Notes**, **Requirements** subsections) instead of front-loading a type-agnostic dump.
+
+Upstream skills (e.g. `/dev-handoff` delegating here) must **choose ticket type before** prompting for this kind of add-on detail, so the scaffold matches the ticket shape.
+
+### Read the template
+
+Read the template that matches the ticket type (resolve basename per `skills/conventions/01-plugin-root-and-templates.md`):
+
+- `bug` → `bug_report.md`
+- `wo`  → `work_order.md`
+- `ctx` → `context.md`
 
 ### Invocation
 

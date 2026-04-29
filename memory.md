@@ -47,6 +47,8 @@ You **must** do this without the user having to ask:
 | Work order | `WO-###` | yes (stub+) | common     | |
 | Context  | `CTX-###`  | **no** until promoted | often | **Intake only**—promote with `/create-ticket promote CTX-###` or `/create-backlog` before `/research`, `/plan`, `/build`, `/vqa` |
 
+- **Interactive intake:** **`create-ticket`** and **`/dev-handoff` → ClaudeOps** collect **ticket type** (and title) **before** the optional “additional notes for the engineer” prompt so the body follows **`bug_report.md`** / **`work_order.md`** / **`context.md`**.
+
 ---
 
 ## Lifecycle & phases (order)
