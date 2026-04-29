@@ -104,6 +104,18 @@ If **`BACKEND`** is not exactly **`github`** or **`jira`** (including `[CONFIGUR
 
 Do **not** create the sprint folder, `ticket.md`, or any local files before this check passes.
 
+### Jira — fetch project issue types before choosing Jira issue type (create mode only)
+
+When **`BACKEND`** is **`jira`** (create mode — not Mode B promote yet):
+
+1. Resolve **`cloudId`** and **`projectKey`** from **`workflow.md` → Ticket Tracker — Jira**. If **`DELEGATED_BACKEND`** caused an earlier skip of the full **`workflow.md`** read, **`Read`** it now to obtain at least that section (and any fields **`createJiraIssue`** needs later).
+2. If either value is missing or still a **`[CONFIGURE: ...]`** placeholder, **stop** with the same class of guidance as an unconfigured backend: set real values (run **`/project-start`** or hand-edit **`workflow.md`**) — **`/create-ticket`** does not assume **`/project-start`** was ever run.
+3. Browse Atlassian MCP descriptors, then call **`getJiraProjectIssueTypesMetadata`** (confirm exact tool name) with **`cloudId`** and **`projectIdOrKey`** = **`projectKey`**. Use **`startAt` / `maxResults`** to pull the full set if the response is paginated.
+4. Build **`availableIssueTypeNames`**: every issue type **`name`** Jira returns for that project (these are **creatable issue types** from project metadata — not a list of existing issues). If the list is empty, **stop** — the project has no usable issue types for this account.
+5. **Do not** run AskUserQuestion about which **Jira** issue type to use, and **do not** pass **`issueTypeName`** to **`createJiraIssue`**, until this fetch has succeeded and you have **`availableIssueTypeNames`**. **After** the fetch, you **always** run **AskUserQuestion** for Jira issue type (see **Backend: Jira**) — **never** skip that question. **`availableIssueTypeNames`** must come **only** from the Atlassian MCP **`getJiraProjectIssueTypesMetadata`** response for the configured **`projectKey`** — **do not** use **`workflow.md`** lines (**Issue type — Bug / Work Order / Context**), bundled template examples, or any file copy as a source for option labels or “available types”; those fields are **not** authoritative for what Jira will accept.
+
+GitHub backend: skip this entire subsection.
+
 ### Invocation
 
 Use whichever shape your runtime exposes:
@@ -125,13 +137,13 @@ Do **not** create the sprint folder or write **`ticket.md`** until **after** the
    - For `ctx`: use **`context.md`**. It includes a **design-handoff scaffold** (Goal, Design reference, Requirements, Acceptance criteria, …). When the intake is a **structured design→engineering handoff** (e.g. `/dev-handoff`, Figma MCP, explicit user choice), **populate that scaffold by default** from the design source — include Requirements and Acceptance criteria when they are grounded in the frame/spec; do not strip them. When the intake is **unstructured** (meetings, transcripts), keep Requirements / Acceptance criteria minimal or `TBD` and rely on Source / Raw Notes — **do not invent** scoped requirements the source material does not support. The user (or `/create-backlog`) completes or trims sections before promotion.
    - This body string (no frontmatter) is what you pass to **`gh issue create --body`** or to the Jira issue description.
 
-4. **Sync to the remote backend first** — execute **only** the branch matching `BACKEND`. The label / issue-type for the new issue is determined by the ticket type:
+4. **Sync to the remote backend first** — execute **only** the branch matching **`BACKEND`**. GitHub labels follow the ticket type. For Jira, **`issueTypeName`** comes **only** from **AskUserQuestion** whose options are **`availableIssueTypeNames`** from the **MCP fetch** — never from **`workflow.md`** issue-type lines.
 
-| Ticket type | Label | Jira issue-type source in workflow.md |
+| Ticket type | GitHub label | Jira type label (on the issue) |
 |---|---|---|
-| `bug` | `bug` | **Issue type — Bug** |
-| `wo` | `work-order` | **Issue type — Work Order** |
-| `ctx` | `context` | **Issue type — Context** |
+| `bug` | `bug` | `bug` |
+| `wo` | `work-order` | `work-order` |
+| `ctx` | `context` | `context` |
 
 #### Backend: GitHub
 
@@ -144,15 +156,21 @@ Do **not** create the sprint folder or write **`ticket.md`** until **after** the
 
 All Jira work goes through the **Atlassian MCP server**. Before calling any MCP tool, browse the MCP tool descriptors for the `atlassian` server and confirm the exact tool names available. If the Atlassian MCP requires authentication, call its `mcp_auth` tool first and stop until authentication succeeds.
 
-1. From `workflow.md` **Ticket Tracker — Jira** section, read `cloudId`, `projectKey`, and the correct issue-type name for the ticket type (table above).
-2. Create the Jira issue using the MCP's `createJiraIssue` tool (confirm the exact tool name against the MCP descriptor). The summary must be prefixed with the ticket ID: `{TICKET-ID}: {title}`.
-   Include these labels on creation:
+**`availableIssueTypeNames`** must already exist from **Jira — fetch project issue types** (create mode). It must be built **exclusively** from the **`getJiraProjectIssueTypesMetadata`** MCP response for this **`projectKey`** — **never** merge in, substitute, or display names taken from **`workflow.md`** (including **Issue type — …** lines or template placeholders).
+
+**`issueTypeName`** for **`createJiraIssue`** is **only** the user’s choice from **AskUserQuestion**; **every option** must be a name from **`availableIssueTypeNames`** (canonical spelling from the MCP response after matching the user’s reply case-insensitively).
+
+1. **Always** run **AskUserQuestion** *after* the fetch. Wording may reference the **workflow ticket type** only (`bug` / `work order` / `context`) — e.g. “Which **Jira** issue type should we use for this **{bug | work order | context}** ticket?” **Do not** mention or copy suggested type names from **`workflow.md`** into the question (that file is not the source of truth for Jira’s scheme).
+2. **`createJiraIssue`:** use `cloudId`, `projectKey`, and **`issueTypeName`**. The summary must be prefixed with the ticket ID: `{TICKET-ID}: {title}`.
+   Include these labels on creation (via **`additional_fields`** / labels as required by the MCP descriptor):
    - `claude-ops`
-   - One of `bug`, `work-order`, or `context` (matching the type)
+   - One of `bug`, `work-order`, or `context` (matching the ticket type)
    - `phase:context-backlog`
    Use the composed body from step 3 as the issue description. Prefer plain text / wiki markup over ADF.
 3. Capture the returned `key` (e.g. `PROJ-123`) and `id` from the MCP response for `jira_issue` and `jira_issue_id` frontmatter.
 4. Do **not** transition the Jira Status field. Phase tracking is done entirely through the `phase:*` label set in step 2.
+
+If **`createJiraIssue`** still fails on issue type, refetch **`getJiraProjectIssueTypesMetadata`** (MCP only), refresh **`availableIssueTypeNames`**, run **AskUserQuestion** again, and retry. You may **optionally** edit **`workflow.md`** **Issue type — …** lines afterward to record what was chosen — purely documentation; the next **`/create-ticket`** run still **must** fetch from Jira via MCP and ask again from that fresh list.
 
 ### Write local files (after remote IDs exist)
 
@@ -231,11 +249,12 @@ Also AskUserQuestion for a **clean title**:
 
 #### Backend: Jira
 
-Use the Atlassian MCP.
+Use the Atlassian MCP. **Before** choosing the target **`issuetype`**, call **`getJiraProjectIssueTypesMetadata`** for the ticket’s **`projectKey`** (read **`projectKey`** / **`cloudId`** from **`workflow.md`** **only** as connection config — not for issue type names) and build **`availableIssueTypeNames`** **solely** from that MCP response, same as create mode (creatable **issue types**, not existing issues).
 
+- **Always** run **AskUserQuestion** after the fetch; options **only** from **`availableIssueTypeNames`** (same rules as create mode). **Do not** read **`workflow.md` Issue type — …** lines to build options or to phrase suggested type names — only MCP-returned names are accurate for the Jira project.
 - Update the issue summary to `{NEW-ID}: {title}` via `editJiraIssue`.
 - Update labels: remove `context`, add `bug` or `work-order` (keep `claude-ops` and `phase:context-backlog`).
-- Update the `issuetype` field on the Jira issue to the mapped issue-type name from `workflow.md` for the new ticket type (e.g. the value of **Issue type — Bug**). If the target issue type is in a different **issue type scheme** and `editJiraIssue` refuses the update, fall back gracefully: leave the Jira issue type as-is, keep the `bug` / `work-order` label as the authoritative type signal, and report this as a note in the final output.
+- Update the `issuetype` field to the resolved name. If **`editJiraIssue`** refuses the update (scheme / permissions), fall back gracefully: leave Jira issue type as-is, keep the `bug` / `work-order` label as the authoritative type signal, and report this in the final output.
 - Replace the description with the new ticket.md body.
 
 ### Report back (promote mode)

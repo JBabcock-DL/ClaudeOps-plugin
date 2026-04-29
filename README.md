@@ -93,7 +93,7 @@ Then, depending on the backend you chose:
 ### Jira branch
 4. List your accessible Atlassian sites and ask which to use
 5. List visible Jira projects and ask which should back this workflow (the project must already exist)
-6. Ask which Jira issue types map to our `bug` and `work-order` ticket types
+6. Fetch that project’s issue types from Jira (e.g. Atlassian MCP `getJiraProjectIssueTypesMetadata`), then ask which fetched types map to our `bug`, `work-order`, and `context` ticket types — options are only names returned by that fetch, so downstream creates do not fail on wrong issue types
 7. Write the cloud ID, site URL, project key, project name, and issue-type mappings into `.github/templates/workflow.md`
 
 Workflow phases (Context Backlog → In Research → In Planning → In Build → In Review → Completed) are tracked as `phase:*` labels on each Jira issue — no Jira workflow / admin changes required.

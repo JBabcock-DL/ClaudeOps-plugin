@@ -159,10 +159,12 @@ All Jira work goes through the **Atlassian MCP server** in Claude Code. Before d
 
 - Record the chosen `projectKey` (e.g. `PROJ`) and `projectName`.
 
-- Determine the Jira **issue types** available in that project (e.g. via `getJiraProjectIssueTypes` or by reading the project metadata from `getVisibleJiraProjects`). AskUserQuestion once for each of our three ticket types, listing the available issue types as options:
-  1. "Which Jira issue type should map to our **bug** ticket type?" — record as `bugIssueType` (default: `Bug` if present)
-  2. "Which Jira issue type should map to our **work-order** ticket type?" — record as `workOrderIssueType` (default: `Task` if present, else `Story`)
-  3. "Which Jira issue type should map to our **context** ticket type? (This is a staging bucket for raw notes that are later promoted.)" — record as `contextIssueType` (default: `Task` if present — it's fine to reuse the same type as work orders, since labels disambiguate)
+- **Issue types — fetch before any mapping questions.** Do **not** ask which Jira issue type maps to bug / work-order / context until you have the **authoritative list for that project** (avoids `createJiraIssue` / workflow mismatches when the template guesses names like `Bug` or `Task` that the project’s issue type scheme does not expose).
+  1. Confirm the Atlassian MCP tool name from descriptors (commonly **`getJiraProjectIssueTypesMetadata`**). Call it with the chosen `cloudId` and **`projectIdOrKey`** set to the chosen `projectKey`. Use `startAt` / `maxResults` (up to the tool’s maximum) until you have the full set if the response is paginated.
+  2. Parse the response and build **`availableIssueTypeNames`**: every **issue type `name`** Jira returns for that project — i.e. **creatable issue types** from metadata, not a list of existing issues (exact spelling — these strings are what `/create-ticket` and `createJiraIssue` must use later).
+  3. If **`availableIssueTypeNames`** is empty, stop and tell the user the project returned no creatable issue types (permissions or project setup); they must fix Jira and rerun `/project-start`.
+  4. **Only now** run AskUserQuestion once per workflow ticket type. Each question’s options must be **only** names from **`availableIssueTypeNames`** — i.e. **only** names returned by the MCP call in step 3 (every option must appear in that response). **Never** take option labels from **`workflow.md`** / template placeholder text (e.g. example “Bug” or “Task” strings in **`templates/workflow.md`**) — those are not the live Jira scheme. Optional prose hints (“default” / “recommended”) may **only** reference names that **actually exist** in **`availableIssueTypeNames`** (case-insensitive), e.g. prefer `Bug` for the bug mapping **if** `Bug` is in the MCP list — if not, omit the hint.
+  5. Record the answers as `bugIssueType`, `workOrderIssueType`, and `contextIssueType` — each value must be **verbatim** one of the fetched names.
 
 - **Labels, not statuses.** Do not attempt to modify the Jira project's workflow or Status field — that requires Jira admin permissions and is project-specific. Workflow phases are tracked via labels on each issue:
   - `phase:context-backlog`, `phase:in-research`, `phase:in-planning`, `phase:in-build`, `phase:in-review`, `phase:completed`
