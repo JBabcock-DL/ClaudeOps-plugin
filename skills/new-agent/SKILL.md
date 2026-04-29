@@ -12,8 +12,8 @@ Arguments received: $ARGUMENTS
 
 Before doing anything else, read (Claude: do not require the user to say “read memory” — it is your job):
 1. memory.md (if it exists in the repo root) — project running memory; skip if missing or empty
-2. .github/templates/workflow.md
-3. .github/templates/agent-handoff.md
+2. workflow.md — resolve path per skills/conventions/01-plugin-root-and-templates.md
+3. agent-handoff.md — resolve path per skills/conventions/01-plugin-root-and-templates.md
 4. CLAUDE.md in the repo root if present (reiterates read/update rules for `memory.md`)
 
 ---

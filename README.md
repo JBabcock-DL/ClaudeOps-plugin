@@ -51,6 +51,18 @@ The skills are immediately available as `/dl-agent-workflow:<skill-name>` in any
 
 ---
 
+## Cursor, VS Code, and dynamic plugin discovery
+
+Skills resolve **`workflow.md`** and other templates using **`skills/conventions/01-plugin-root-and-templates.md`** — consumer **`REPO_ROOT/.github/templates/`** overrides bundled **`PLUGIN_ROOT/templates/`**. Nothing relies on hardcoded paths.
+
+**Optional:** Set **`CLAUDE_OPS_PLUGIN_ROOT`** to an absolute **plugin root** (directory containing **`templates/workflow.md`**) when your IDE does not expose marketplace folders — **never commit this value**.
+
+Claude Code sets **`CLAUDE_PLUGIN_ROOT`** automatically. Otherwise **Add Folder to Workspace** for your **`labs-agent-workflow`** install so Glob can find **`.claude-plugin/plugin.json`**.
+
+You still need a **configured** **`workflow.md`** (**Backend:** **`github`** or **`jira`** with real IDs). Run **`/project-start`** in your product repo, or edit **`workflow.md`** — bundled **`templates/workflow.md`** ships **`[CONFIGURE: ...]`** placeholders until configured.
+
+---
+
 ## Start a New Project
 
 Once the plugin is installed, open Claude Code in the root of your new repo and run:

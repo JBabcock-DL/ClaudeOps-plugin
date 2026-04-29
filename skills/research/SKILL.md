@@ -22,7 +22,7 @@ Do not proceed until both values are confirmed.
 
 Before starting, read these files in order:
 1. memory.md (if it exists in the repo root) — project running memory; skip if missing or empty
-2. .github/templates/workflow.md
+2. workflow.md — resolve path per skills/conventions/01-plugin-root-and-templates.md
 3. $0/ticket.md
 
 **CTX guard.** If the resolved ticket folder name matches `CTX-*`, stop immediately and tell the user: "Research cannot run on a context ticket — promote it first with `/create-ticket promote {CTX-ID}` or run `/create-backlog` to bulk-triage."

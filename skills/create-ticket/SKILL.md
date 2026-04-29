@@ -21,16 +21,27 @@ If neither maps cleanly, ask the user using AskUserQuestion which mode they want
   1. **Create a new ticket** — bug, work order, or context
   2. **Promote a context ticket** — convert a CTX-### into a bug or work-order
 
-Before doing anything, read `memory.md` in the repo root if it exists, then read `.github/templates/workflow.md`. From workflow.md, read the **Backend:** field under **## Ticket Backend**. Record it as `BACKEND` with value `github` or `jira`. If the **Backend:** placeholder is still unresolved (`[CONFIGURE: github | jira]`), stop and tell the user to finish `/project-start` first. If this run revealed a durable fact for **Quick reference** (e.g. confirmed backend quirks), update `memory.md` — per `CLAUDE.md` in the repo root if present, without the user having to ask.
+---
+
+## Path resolution (`create-ticket`)
+
+**`REPO_ROOT`** — Root where **`.github/Sprint */`** ticket folders will be created (working directory / workspace root unless the user scoped another path).
+
+Resolve **`workflow.md`**, **`bug_report.md`**, **`work_order.md`**, and **`context.md`** using **`skills/conventions/01-plugin-root-and-templates.md`** — shared by all **`labs-agent-workflow`** skills (**no machine-specific paths**).
+
+---
+
+Before doing anything else, read **`{REPO_ROOT}/memory.md`** if it exists, then load **`workflow.md`** via that convention. From **`workflow.md`**, read the **Backend:** field under **## Ticket Backend**. Record it as **`BACKEND`** with value **`github`** or **`jira`**. If the **Backend:** placeholder is still unresolved (`[CONFIGURE: github | jira]`), stop and tell the user to finish **`/project-start`** in **`REPO_ROOT`** (or to edit **`workflow.md`** so **Backend** is set — bundled **`templates/workflow.md`** ships unresolved placeholders until configured). If this run revealed a durable fact for **Quick reference** (e.g. confirmed backend quirks), update **`memory.md`** — per **`CLAUDE.md`** in **`REPO_ROOT`** if present, without the user having to ask.
 
 ---
 
 ## Mode A — Create
 
-Read the template that matches the ticket type:
-- `bug` → `.github/templates/bug_report.md`
-- `wo`  → `.github/templates/work_order.md`
-- `ctx` → `.github/templates/context.md`
+Read the template that matches the ticket type (resolve basename per `skills/conventions/01-plugin-root-and-templates.md`):
+
+- `bug` → `bug_report.md`
+- `wo`  → `work_order.md`
+- `ctx` → `context.md`
 
 ### Collect missing context
 
@@ -43,6 +54,13 @@ Parse $ARGUMENTS for ticket type ($0) and title ($1). For any value not provided
 - **Title** — "What is the ticket title?" (For `ctx` tickets, a loose summary is fine — this becomes the folder slug.)
 
 Do not proceed until both values are confirmed.
+
+### Invocation
+
+Use whichever shape your runtime exposes:
+
+- **Slash-command:** `/create-ticket {ctx|wo|bug} "{title}"` — when prompted for the ticket body, paste the composed Markdown body. **`workflow.md`** already resolved above supplies **Backend** (GitHub vs Jira).
+- **Skill-proxy:** **`Read`** this **`SKILL.md`** from **`PLUGIN_ROOT`** and execute **Execute the create flow** below inline.
 
 ### Execute the create flow
 
@@ -135,7 +153,7 @@ Also AskUserQuestion for a **clean title**:
 1. Compute the next sequential ID for the chosen target type (scan `BUG-*` or `WO-*` folders across `.github/Sprint */`).
 2. Generate a new slug from the (possibly refined) title.
 3. Rename the folder: `.github/Sprint {N}/CTX-###-{old-slug}/` → `.github/Sprint {N}/{BUG|WO}-###-{new-slug}/`.
-4. Replace the body of `ticket.md` with the correct template (`bug_report.md` or `work_order.md`), **migrating the salient content** from the CTX body:
+4. Replace the body of `ticket.md` with the correct template (`bug_report.md` or `work_order.md`) using **`skills/conventions/01-plugin-root-and-templates.md`**, **migrating the salient content** from the CTX body:
    - **Source** and **Raw Notes** → merged into **Additional Context** (bug) or the top of **Problem Story** / **Hypothesis** (work order).
    - **Observed Problems / Opportunities** → seed entries for **Requirements**.
    - **Assets & Links** → **References**.

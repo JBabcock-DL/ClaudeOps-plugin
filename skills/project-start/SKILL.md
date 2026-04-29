@@ -30,8 +30,7 @@ Do not proceed until all three values (name, goal, backend) are confirmed.
 
 Record the chosen backend as the variable `BACKEND` with value `github` or `jira` for the rest of this skill. You will use it to branch steps 5 and 6 below.
 
-If `memory.md` already exists in the current working directory (e.g. resuming a partial setup), read it first, then read:
-.github/templates/workflow.md — to understand the full system you are replicating
+If `memory.md` already exists in the current working directory (e.g. resuming a partial setup), read it first. Resolve **`PLUGIN_ROOT`** per **`skills/conventions/01-plugin-root-and-templates.md`**, then read **`{PLUGIN_ROOT}/templates/workflow.md`** — to understand the full system you are replicating before scaffolding.
 
 Then scaffold the following in the current working directory:
 
@@ -52,11 +51,11 @@ Then scaffold the following in the current working directory:
    - .claude/skills/project-start/
    - .claude/skills/vqa/
 
-2. Copy all template files from .github/templates/ into the new project's .github/templates/ — the full set is `workflow.md`, `bug_report.md`, `work_order.md`, `context.md`, and `agent-handoff.md`. Confirm all five files land in the new repo.
+2. Copy all template files from **`{PLUGIN_ROOT}/templates/`** into the new project's **`.github/templates/`** — the full set is `workflow.md`, `bug_report.md`, `work_order.md`, `context.md`, and `agent-handoff.md`. Confirm all five files land in the new repo. (**`PLUGIN_ROOT`** — **`skills/conventions/01-plugin-root-and-templates.md`**.)
 
-2b. Copy `memory.md` from the claude-ops plugin **package root** (the directory that contains this skill's `skills/`, `templates/`, and `README.md` — the same place you are copying from, not from `.github/templates/`) into the **new repository root** as `memory.md`. The shipped plugin includes this file; always place it in new scaffolds so sessions can keep short project facts and save context and tokens.
+2b. Copy **`memory.md`** from **`{PLUGIN_ROOT}/memory.md`** into the **new repository root** as **`memory.md`**. The shipped plugin includes this file at the plugin root.
 
-3. Copy all skill SKILL.md files from .claude/skills/ into the new project's .claude/skills/
+3. Copy the full **`{PLUGIN_ROOT}/skills/`** directory tree into the new project's **`.claude/skills/`** — include **`conventions/`** and every skill package (preserve relative paths). Consumer repos need **`skills/conventions/01-plugin-root-and-templates.md`** for the same dynamic path rules as the marketplace plugin.
 
 3a. Write `.claude/settings.json` in the new project root. The permissions list depends on the chosen backend:
 
@@ -84,18 +83,18 @@ Then scaffold the following in the current working directory:
    ```markdown
    # {PROJECT_NAME}
 
-   **Ticket backend:** {BACKEND} (IDs, commands, and phase mapping live in `memory.md` Quick reference and `.github/templates/workflow.md`.)
+   **Ticket backend:** {BACKEND} (IDs, commands, and phase mapping live in `memory.md` Quick reference and **`workflow.md`** — resolve path per **`skills/conventions/01-plugin-root-and-templates.md`**.)
 
    ## Agent rules (claude-ops) — do not require the user to ask
 
-   1. If `memory.md` exists in this repository root, read it at the start of any ticket- or workflow-related work, then read `.github/templates/workflow.md` for the full spec.
+   1. If `memory.md` exists in this repository root, read it at the start of any ticket- or workflow-related work, then resolve and read **`workflow.md`** per **`skills/conventions/01-plugin-root-and-templates.md`** for the full spec.
    2. Update `memory.md` when you establish or change something durable: backend facts, default git strategy, team conventions, MCP/tool setup, or recurring mistakes to avoid. Keep entries short. Never replace per-ticket `plan.md` or `ticket.md` with `memory.md`.
    3. Workflow skills are in `.claude/skills/`. Use the slash commands from your README (e.g. `create-ticket`, `create-backlog`, `research`, `plan`, `build`, `vqa`).
 
    ## Where to look
 
    - `memory.md` — short cross-ticket running memory
-   - `.github/templates/workflow.md` — structure, ticket lifecycle, GitHub or Jira keys, commands
+   - `.github/templates/workflow.md` — after this scaffold, configured **`workflow.md`** lives here (agents should still resolve via **`skills/conventions/01-plugin-root-and-templates.md`** when templates are missing from cwd)
    - `.github/templates/agent-handoff.md` — copy-paste prompt for new agent sessions
    ```
 

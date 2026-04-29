@@ -47,7 +47,7 @@ Apply the strategy at the right moments:
 
 Before touching Figma, read these files in order:
 1. memory.md (if it exists in the repo root) — project running memory; skip if missing or empty
-2. .github/templates/workflow.md
+2. workflow.md — resolve path per skills/conventions/01-plugin-root-and-templates.md
 3. $ARGUMENTS/ticket.md
 4. $ARGUMENTS/plan.md
 

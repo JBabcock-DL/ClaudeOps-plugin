@@ -2,11 +2,18 @@
 
 <!-- This file is part of the dl-agent workflow. See CLAUDE.md (repo root) for mandatory read/update rules. -->
 
+## Plugin workspace vs consumer repo
+
+- **Developing `labs-agent-workflow`:** **`PLUGIN_ROOT`** is discovered dynamically — **`skills/conventions/01-plugin-root-and-templates.md`**. Never assume paths from another machine.
+- **Consumer project (after `/project-start`):** **`REPO_ROOT/.github/templates/`** usually holds configured **`workflow.md`** and copies of **`agent-handoff.md`** — still resolve via that convention when reading so IDE-only opens work without copying templates.
+
+---
+
 ## Instructions for agents (obligatory when this file exists)
 
 You **must** do this without the user having to ask:
 
-1. **Read this file** at the start of any session, subagent, or skill run that does ticket or repo work, **before** deep-diving a single ticket—unless the user is only doing an unrelated one-off. Then read `.github/templates/workflow.md` for the full spec.
+1. **Read this file** at the start of any session, subagent, or skill run that does ticket or repo work, **before** deep-diving a single ticket—unless the user is only doing an unrelated one-off. Then resolve and read **`workflow.md`** per **`skills/conventions/01-plugin-root-and-templates.md`** for the full spec.
 2. **Update this file** when you learn something stable and reusable: backend IDs, Jira/phase quirks, team git preference, “always use” commands, or a mistake to avoid. Keep each bullet short; do not paste whole tickets or long plans here.
 3. **Do not** move `plan.md` / `ticket.md` / `research/` content into here—`memory.md` is for **cross-ticket** facts only.
 
@@ -25,8 +32,8 @@ You **must** do this without the user having to ask:
 
 ## Where everything lives (paths)
 
-- **Global workflow + IDs:** `.github/templates/workflow.md` (GitHub Project / field IDs, `gh` snippets; or Jira cloud, project key, phase labels, MCP hints)
-- **Handoff / new sessions:** `.github/templates/agent-handoff.md`
+- **Global workflow + IDs:** **`workflow.md`** — resolve per **`skills/conventions/01-plugin-root-and-templates.md`** (typically **`REPO_ROOT/.github/templates/workflow.md`** after **`/project-start`**, else **`PLUGIN_ROOT/templates/workflow.md`**)
+- **Handoff / new sessions:** **`agent-handoff.md`** — same resolution rules
 - **Per ticket:** `.github/Sprint {N}/{TICKET-ID}-{slug}/ticket.md` + `plan.md` + optional `research/`, `scripts/`
 - **Skills (slash commands):** `.claude/skills/{skill}/SKILL.md` — *after `/project-start` these are the copies in this repo; developing the plugin may use a marketplace path instead*
 
@@ -102,4 +109,4 @@ You **must** do this without the user having to ask:
 
 ## Changelog (optional)
 
-- *YYYY-MM-DD — what changed in memory or in workflow setup (not per-ticket work).*
+- *2026-04-29 — Documented **`PLUGIN_ROOT`** / **`workflow.md`** resolution via **`skills/conventions/01-plugin-root-and-templates.md`**; removed reliance on machine-specific paths.*
