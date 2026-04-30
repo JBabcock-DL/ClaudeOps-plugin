@@ -172,6 +172,7 @@ For `ctx` tickets from a structured design source:
 
 For all ticket types:
 - [ ] All content is in the description field — nothing deferred to a comment or external doc not linked in the body
+- [ ] **Figma VQA Checklist** section present (in `wo` and `bug` bodies). If a Figma URL was provided as part of the source, parse `file_key` and `node_id` from it (`figma.com/design/<fileKey>/...?node-id=<nodeId>`, converting `-` to `:`) and write them into the `Figma source` table along with the deep link and frame name. Leave the Assertions table empty — `/vqa` fills it. If the ticket has no UI surface, replace the checklist body with the literal sentinel `**N/A — no Figma artifact (backend / API / infra ticket).**` (or the bug-template equivalent). Never leave the section blank or with placeholder TODO values — `/vqa` will hard-stop on those.
 
 4. **Sync to the remote backend first** — execute **only** the branch matching **`BACKEND`**. GitHub labels follow the ticket type. For Jira, **`issueTypeName`** comes **only** from **AskUserQuestion** whose options are **`availableIssueTypeNames`** from the **MCP fetch** — never from **`workflow.md`** issue-type lines.
 

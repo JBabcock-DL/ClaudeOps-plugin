@@ -122,6 +122,66 @@ Stack anchors: routes, services, repos, queues, schemas, env flags. Code Connect
 
 ---
 
+## Figma VQA Checklist
+
+<!--
+`/vqa` populates and evaluates this section AUTOMATICALLY against the Figma node referenced above. The build must match the design ~1:1. The agent fills `Captured` columns by reading Figma via the Figma MCP (get_design_context, get_variable_defs, get_screenshot) and then compares against the implemented build (rendered DOM, CSS, screenshot). Each row must end up PASS / FAIL / N/A — no blank rows on a completed ticket.
+
+If this ticket has no UI surface, replace the entire section body with:
+**N/A — no Figma artifact (backend / API / infra ticket).**
+-->
+
+**Figma source (must be filled before `/vqa` runs):**
+
+| Field | Value |
+| --- | --- |
+| `file_key` | `<!-- e.g. AbCdEfGhIj1234 -->` |
+| `node_id` | `<!-- e.g. 123:456 -->` |
+| Figma deep link | `<!-- https://www.figma.com/design/<fileKey>/...?node-id=<nodeId> --> ` |
+| Frame / scope | `<!-- e.g. Checkout — payment methods -->` |
+| Captured at | `<!-- ISO date the screenshot/design_context was pulled by /vqa -->` |
+
+**Assertions** *(agent fills `Design (Figma)` and `Build (implemented)` columns, then marks Result):*
+
+| # | Category | Property | Design (Figma) | Build (implemented) | Result |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Layout | Frame width × height | | | |
+| 2 | Layout | Auto-layout direction / gap | | | |
+| 3 | Layout | Padding (T/R/B/L) | | | |
+| 4 | Layout | Alignment / distribution | | | |
+| 5 | Typography | Font family | | | |
+| 6 | Typography | Font weight | | | |
+| 7 | Typography | Font size | | | |
+| 8 | Typography | Line height | | | |
+| 9 | Typography | Letter spacing | | | |
+| 10 | Typography | Text token (display/body/etc.) | | | |
+| 11 | Color | Background fill (hex / token) | | | |
+| 12 | Color | Foreground / text fill (hex / token) | | | |
+| 13 | Color | Border / stroke (hex / token) | | | |
+| 14 | Color | State variants (hover / pressed / disabled) | | | |
+| 15 | Spacing | Margin / gap tokens | | | |
+| 16 | Effects | Border radius | | | |
+| 17 | Effects | Shadow / elevation token | | | |
+| 18 | Effects | Opacity | | | |
+| 19 | Iconography | Icon set / size | | | |
+| 20 | Components | Code Connect target / shadcn primitive used | | | |
+| 21 | Components | Component variants present (size, intent, state) | | | |
+| 22 | Content | Copy matches Figma exactly | | | |
+| 23 | Content | Localization placeholders honored | | | |
+| 24 | Responsive | Breakpoint behavior matches Figma variants | | | |
+| 25 | Accessibility | Contrast ratio (WCAG AA / AAA) | | | |
+| 26 | Accessibility | Hit target ≥ 44×44 pt | | | |
+| 27 | Accessibility | Focus ring visible & token-based | | | |
+| 28 | Screenshot | Side-by-side overlay diff (path) | | | |
+
+**Per-row deviations:**
+
+<!-- For every FAIL row, drop a one-line note here: "Row 7 — design 16/24, build 14/20: regenerate from `--text-body-md` token". `/vqa` writes these. -->
+
+-
+
+---
+
 ## 🔍 Ready for `/research`
 
 <!--

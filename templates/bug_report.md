@@ -105,6 +105,64 @@ Optional: related analytics or support-volume note.
 
 -
 
+---
+
+## Figma VQA Checklist
+
+<!--
+For visual/UI bugs, `/vqa` populates and evaluates this section AUTOMATICALLY against the Figma node referenced in **Design reference** above. The post-fix build must match the design ~1:1. Same structure as the work-order template — the agent fills both columns and marks PASS / FAIL / N/A.
+
+If this is a non-visual bug (API / logic / infra), replace the section body with:
+**N/A — non-visual bug; functional QA only.**
+-->
+
+**Figma source (must be filled before `/vqa` runs):**
+
+| Field | Value |
+| --- | --- |
+| `file_key` | |
+| `node_id` | |
+| Figma deep link | |
+| Frame / scope | |
+| Captured at | |
+
+**Assertions** *(agent fills `Design (Figma)` and `Build (implemented)` columns):*
+
+| # | Category | Property | Design (Figma) | Build (implemented) | Result |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Layout | Frame width × height | | | |
+| 2 | Layout | Auto-layout direction / gap | | | |
+| 3 | Layout | Padding (T/R/B/L) | | | |
+| 4 | Layout | Alignment / distribution | | | |
+| 5 | Typography | Font family | | | |
+| 6 | Typography | Font weight | | | |
+| 7 | Typography | Font size | | | |
+| 8 | Typography | Line height | | | |
+| 9 | Typography | Letter spacing | | | |
+| 10 | Typography | Text token | | | |
+| 11 | Color | Background fill | | | |
+| 12 | Color | Foreground / text fill | | | |
+| 13 | Color | Border / stroke | | | |
+| 14 | Color | State variants (hover / pressed / disabled) | | | |
+| 15 | Spacing | Margin / gap tokens | | | |
+| 16 | Effects | Border radius | | | |
+| 17 | Effects | Shadow / elevation token | | | |
+| 18 | Effects | Opacity | | | |
+| 19 | Iconography | Icon set / size | | | |
+| 20 | Components | Code Connect / shadcn primitive | | | |
+| 21 | Components | Variants present | | | |
+| 22 | Content | Copy matches Figma | | | |
+| 23 | Content | Localization placeholders | | | |
+| 24 | Responsive | Breakpoint variants | | | |
+| 25 | Accessibility | Contrast ratio (WCAG AA) | | | |
+| 26 | Accessibility | Hit target ≥ 44×44 pt | | | |
+| 27 | Accessibility | Focus ring visible & token-based | | | |
+| 28 | Screenshot | Side-by-side overlay diff (path) | | | |
+
+**Per-row deviations:**
+
+-
+
 ## Suspected cause *(optional)*
 
 <!-- Engineer / agent hypothesis — avoids duplicate spelunking -->
