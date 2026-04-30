@@ -58,6 +58,7 @@ A calling skill (e.g. `/dev-handoff`) may set these variables to skip questions 
 | **`DELEGATED_TITLE`** | Ticket title string | Title question |
 | **`DELEGATED_BODY`** | Pre-composed markdown body | “Additional information” prompt + body composition |
 | **`DELEGATED_BACKEND`** | `github \| jira` | `workflow.md` Backend read — use directly |
+| **`DELEGATED_REMOTE_ONLY`** | `true` — operate against remote backend only; skip local sprint folder, `ticket.md`, `plan.md` writes | All local-file steps |
 
 ### Collect missing context (order matters)
 
@@ -124,6 +125,8 @@ Use whichever shape your runtime exposes:
 - **Skill-proxy:** **`Read`** this **`SKILL.md`** from **`PLUGIN_ROOT`** and execute **Execute the create flow** below inline.
 
 ### Execute the create flow
+
+If **`DELEGATED_REMOTE_ONLY`** is `true`, perform steps 1–4 (compose body + sync to remote) but **skip** steps 5–7 (no local folder, no `ticket.md`, no `plan.md`). The report should cite remote IDs/URL only.
 
 Do **not** create the sprint folder or write **`ticket.md`** until **after** the remote issue exists and you have captured its IDs (steps 1–3 prepare content; step 4 is remote; steps 5–7 write local files).
 
@@ -253,6 +256,10 @@ Also AskUserQuestion for a **clean title**:
 
 - "What title should the promoted ticket have?" — default to the current CTX title with the `CTX-###:` prefix stripped.
 
+### Remote-only delegation
+
+If **`DELEGATED_REMOTE_ONLY=true`**, skip every local file mutation (steps 1–6 of Execute the promote flow that touch folders / `ticket.md` / tombstone). Run only the remote update branch (GitHub or Jira) plus a remote comment recording `Promoted from {OLD-ID} to {NEW-ID} on {YYYY-MM-DD}` (since there is no local frontmatter `promoted_from` to write). The remote issue title still gets the new `{NEW-ID}: {title}` prefix and the new label set.
+
 ### Execute the promote flow
 
 1. Compute the next sequential ID for the chosen target type (scan `BUG-*` or `WO-*` folders across `.github/Sprint */`).
@@ -270,7 +277,7 @@ Also AskUserQuestion for a **clean title**:
    - Keep the existing remote IDs (`github_issue` / `project_item_id`, or `jira_issue` / `jira_issue_id`) — the remote issue is not re-created.
    - Add `promoted_from: CTX-###`.
 6. Keep the old CTX **number reserved** — do not reuse `CTX-###` later. (Since we renamed the folder, no CTX-### folder will exist anymore; leave a tombstone in `.github/Sprint {N}/CTX-###-PROMOTED.md` containing a single line: `Promoted to {BUG|WO}-### on {YYYY-MM-DD}. See ./{new-folder}/ticket.md.`)
-7. Update the remote issue to reflect the new type and ID — **only if** **`BACKEND`** is **`github`** or **`jira`** (from **`workflow.md`**) **and** the ticket’s remote ID fields are not **`TBD`**. Otherwise **skip** the GitHub/Jira subsections below and report that the local promote finished without a remote update (configure **`workflow.md`** and real remote IDs before expecting the tracker to match).
+7. Update the remote issue to reflect the new type and ID — **only if** **`BACKEND`** is **`github`** or **`jira`** (from **`workflow.md`**) **and** the ticket’s remote ID fields are not **`TBD`**. Otherwise **skip** the GitHub/Jira subsections below and report that the local promote finished without a remote update (configure **`workflow.md`** and real remote IDs before expecting the tracker to match). When **`DELEGATED_REMOTE_ONLY=true`**, the remote update is the only output — there is no local folder, no `ticket.md`, no tombstone.
 
 #### Backend: GitHub
 
@@ -298,4 +305,5 @@ Use the Atlassian MCP. **Before** choosing the target **`issuetype`**, call **`g
 - Backend used
 - **If GitHub:** issue URL (unchanged), confirmation that labels and title were updated
 - **If Jira:** issue key (unchanged), confirmation that labels, summary, and (if successful) issue type were updated; any fallback notes
+- If **`DELEGATED_REMOTE_ONLY=true`**: report only the remote key/URL and the new ID; explicitly note no local files were created.
 - Recommended next step: `/research` (for unfamiliar problems) or `/plan` (if scope is clear)
