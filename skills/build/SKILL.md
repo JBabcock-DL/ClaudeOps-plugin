@@ -51,7 +51,7 @@ Execution steps (in order):
 
 1. Move the ticket to **In Build**, using the method determined by the **Backend:** field in workflow.md:
    - **GitHub backend:** GraphQL `updateProjectV2ItemFieldValue` mutation from the **Key Commands (GitHub)** block, using the `project_item_id` from ticket.md frontmatter and the In Build option ID from workflow.md.
-   - **Jira backend:** via the Atlassian MCP `editJiraIssue` tool on the key in the ticket's `jira_issue` frontmatter — remove any `phase:*` label and add `phase:in-build`. Then read the **Phase → Transition map** from `workflow.md`. If the row for `phase:in-build` is not `skip`, call `getTransitionsForJiraIssue` on `{jira_issue}`, match the configured transition name case-insensitively against `transitions[].name` to get its `id`, then call `transitionJiraIssue` with that `id`. If the configured name is not currently available (workflow guard) or the row is `skip`, continue without erroring — the label swap is authoritative.
+   - **Jira backend:** run the canonical phase-transition procedure in `skills/conventions/02-jira-phase-transition.md` with `TARGET_PHASE = phase:in-build`. In short: `getJiraIssue` → drop existing `phase:*` and append `phase:in-build` while preserving `claude-ops` + the type label → `editJiraIssue` with the **full** new labels array (never call `editJiraIssue` with only the phase label — it replaces the array) → re-read and verify exactly one `phase:*` plus `claude-ops` + type label remain → then optionally fire the configured transition from the **Phase → Transition map**. Do not assume `/plan` already swapped the label — run the procedure unconditionally. Build subagents spawned in step 3 below must NOT repeat this — only this orchestrator owns the phase boundary.
 
 2. Read the `## Build Agents` section of plan.md. It defines ordered phases. Each phase lists one or more build domains and the plan steps they own.
 
@@ -70,7 +70,7 @@ Execution steps (in order):
      Branch name (if branch-per-agent): {TICKET-ID}/{domain}
      ```
 
-   - Instruction: "Execute only the steps assigned to you. Check off each step in plan.md as you complete it. Do not modify ticket.md or the remote issue (GitHub issue or Jira issue). Follow the Git strategy block above exactly."
+   - Instruction: "Execute only the steps assigned to you. Check off each step in plan.md as you complete it. Do not modify ticket.md, do not call `editJiraIssue` / `transitionJiraIssue` / `gh issue edit`, and do not run the phase-transition procedure — the `/build` orchestrator already did that. You were spawned by `/build`, so skip the 'Move the ticket to In Build' step in your skill's instructions. Follow the Git strategy block above exactly."
 
 4. Wait for all agents in the phase to complete before launching the next phase.
 
