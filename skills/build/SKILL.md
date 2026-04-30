@@ -42,7 +42,7 @@ Before starting, read these files in order:
 **CTX guard.** If the resolved ticket folder name matches `CTX-*`, stop immediately and tell the user: "Build cannot run on a context ticket — promote it first with `/create-ticket promote {CTX-ID}` or run `/create-backlog`."
 
 Rules:
-- Do not start if plan.md is a stub or has no steps — report back that the plan needs to be written first
+- Do not start if `$ARGUMENTS/plan.md` is missing, empty, a stub, or has no steps — report back that the plan was never persisted to the ticket folder. If the user planned in an IDE that uses a sidecar plan file (e.g. Cursor's `.plan.md` or any in-memory plan-mode buffer), tell them to re-run `/plan` so the full plan is written to `$ARGUMENTS/plan.md`; build agents cannot read IDE-local sidecars.
 - Do not start if plan.md has no `## Build Agents` section — report back that the planner must define build phases before orchestration can begin
 - Do not modify ticket.md or the remote issue directly — build agents handle their own step checkoffs in plan.md
 - Agents within a phase run IN PARALLEL. Phases run SEQUENTIALLY — do not start Phase N+1 until all agents in Phase N have completed.
@@ -51,7 +51,7 @@ Execution steps (in order):
 
 1. Move the ticket to **In Build**, using the method determined by the **Backend:** field in workflow.md:
    - **GitHub backend:** GraphQL `updateProjectV2ItemFieldValue` mutation from the **Key Commands (GitHub)** block, using the `project_item_id` from ticket.md frontmatter and the In Build option ID from workflow.md.
-   - **Jira backend:** via the Atlassian MCP `editJiraIssue` tool on the key in the ticket's `jira_issue` frontmatter — remove any `phase:*` label and add `phase:in-build`.
+   - **Jira backend:** via the Atlassian MCP `editJiraIssue` tool on the key in the ticket's `jira_issue` frontmatter — remove any `phase:*` label and add `phase:in-build`. Then read the **Phase → Transition map** from `workflow.md`. If the row for `phase:in-build` is not `skip`, call `getTransitionsForJiraIssue` on `{jira_issue}`, match the configured transition name case-insensitively against `transitions[].name` to get its `id`, then call `transitionJiraIssue` with that `id`. If the configured name is not currently available (workflow guard) or the row is `skip`, continue without erroring — the label swap is authoritative.
 
 2. Read the `## Build Agents` section of plan.md. It defines ordered phases. Each phase lists one or more build domains and the plan steps they own.
 

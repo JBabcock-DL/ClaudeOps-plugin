@@ -95,7 +95,7 @@ The six workflow phases are:
 
 These phases are stored on each ticket:
 - **GitHub backend** → as the Status single-select field on the Project board
-- **Jira backend** → as a `phase:<name>` label on each Jira issue (e.g. `phase:in-build`), because Jira workflow transitions depend on project-level configuration we cannot assume. The Jira Status field is left at whatever default the project workflow provides.
+- **Jira backend** → as a `phase:<name>` label on each Jira issue (e.g. `phase:in-build`). The label is authoritative. Optionally, each phase can also fire a Jira workflow **transition** (configured via the **Phase → Transition map** below) so the issue's Status field updates and the card physically moves on a default Status-grouped Jira board. The transition is best-effort — if the mapping is `skip` or the named transition is not currently available from the issue's state, the label swap still wins.
 
 ---
 
@@ -178,6 +178,21 @@ Phases are tracked as **labels** on each Jira issue (not Status), so no workflow
 | Completed | `phase:completed` |
 
 In addition, every ticket created by this workflow gets a `claude-ops` label for easy JQL filtering, plus exactly one type label: `bug`, `work-order`, or `context`. When a context ticket is promoted via `/create-ticket promote` or `/create-backlog`, the `context` label is removed and replaced with `bug` or `work-order`, and the Jira `issuetype` field is updated accordingly.
+
+### Phase → Transition map (Jira Status)
+
+<!-- CONFIGURE: Optional. Each row maps a workflow phase to a Jira workflow transition NAME (verbatim, as returned by getTransitionsForJiraIssue). When set, phase skills will additionally call transitionJiraIssue so the issue's Status field updates and the card moves on a Status-grouped Kanban board. Set the value to `skip` to leave Status untouched for that phase. -->
+
+| Phase | Jira transition name |
+|---|---|
+| `phase:context-backlog` | `[CONFIGURE: transition name | skip]` |
+| `phase:in-research`     | `[CONFIGURE: transition name | skip]` |
+| `phase:in-planning`     | `[CONFIGURE: transition name | skip]` |
+| `phase:in-build`        | `[CONFIGURE: transition name | skip]` |
+| `phase:in-review`       | `[CONFIGURE: transition name | skip]` |
+| `phase:completed`       | `[CONFIGURE: transition name | skip]` |
+
+Resolution at runtime: agents call `getTransitionsForJiraIssue` on the target issue to resolve the transition `id` matching the configured `name` (case-insensitive), then call `transitionJiraIssue` with that `id`. If the name is not currently available (Jira workflow guards based on current Status) or the value is `skip`, the agent skips the transition and continues — the label swap is authoritative.
 
 ### Key Operations (Jira)
 

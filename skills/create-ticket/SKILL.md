@@ -204,7 +204,7 @@ All Jira work goes through the **Atlassian MCP server**. Before calling any MCP 
    - `phase:context-backlog`
    Use the composed body from step 3 as the issue description. Prefer plain text / wiki markup over ADF.
 3. Capture the returned `key` (e.g. `PROJ-123`) and `id` from the MCP response for `jira_issue` and `jira_issue_id` frontmatter.
-4. Do **not** transition the Jira Status field. Phase tracking is done entirely through the `phase:*` label set in step 2.
+4. **Optionally transition Status** to match `phase:context-backlog`. Read the **Phase → Transition map** from `workflow.md`. If the row for `phase:context-backlog` is not `skip`, call `getTransitionsForJiraIssue` on the new issue key, match the configured transition name case-insensitively against `transitions[].name` to get its `id`, then call `transitionJiraIssue` with that `id`. If the configured name is not currently available (workflow guard — newly created issues often start in the right column already) or the row is `skip`, continue without erroring — the label is authoritative.
 
 If **`createJiraIssue`** still fails on issue type, refetch **`getJiraProjectIssueTypesMetadata`** (MCP only), refresh **`availableIssueTypeNames`**, run **AskUserQuestion** again, and retry. You may **optionally** edit **`workflow.md`** **Issue type — …** lines afterward to record what was chosen — purely documentation; the next **`/create-ticket`** run still **must** fetch from Jira via MCP and ask again from that fresh list.
 

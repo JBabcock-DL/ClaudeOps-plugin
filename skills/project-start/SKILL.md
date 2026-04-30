@@ -166,10 +166,16 @@ All Jira work goes through the **Atlassian MCP server** in Claude Code. Before d
   4. **Only now** run AskUserQuestion once per workflow ticket type. Each question’s options must be **only** names from **`availableIssueTypeNames`** — i.e. **only** names returned by the MCP call in step 3 (every option must appear in that response). **Never** take option labels from **`workflow.md`** / template placeholder text (e.g. example “Bug” or “Task” strings in **`templates/workflow.md`**) — those are not the live Jira scheme. Optional prose hints (“default” / “recommended”) may **only** reference names that **actually exist** in **`availableIssueTypeNames`** (case-insensitive), e.g. prefer `Bug` for the bug mapping **if** `Bug` is in the MCP list — if not, omit the hint.
   5. Record the answers as `bugIssueType`, `workOrderIssueType`, and `contextIssueType` — each value must be **verbatim** one of the fetched names.
 
-- **Labels, not statuses.** Do not attempt to modify the Jira project's workflow or Status field — that requires Jira admin permissions and is project-specific. Workflow phases are tracked via labels on each issue:
+- **Labels are authoritative.** Workflow phases are tracked via labels on each issue:
   - `phase:context-backlog`, `phase:in-research`, `phase:in-planning`, `phase:in-build`, `phase:in-review`, `phase:completed`
   - Every ticket also gets a `claude-ops` label plus exactly one of `bug`, `work-order`, or `context`
   No pre-creation of labels is required — Jira creates labels on first use.
+
+- **Phase → Transition map (optional, for visible board movement).** Jira boards grouped by Status will not visibly move when only labels change. To make cards physically move on the default Status-grouped Kanban view, capture an optional mapping from each `phase:*` to a Jira workflow transition.
+  1. Pick any existing issue in the project (or create a throwaway one) and call **`getTransitionsForJiraIssue`** with `cloudId` and that `issueIdOrKey`. Record the available `transitions[].name` values as **`availableTransitionNames`** (case-preserved as Jira returns them).
+  2. If the list is empty, skip mapping entirely — record all six phases as `skip` and inform the user the project's workflow exposes no transitions to this account.
+  3. Otherwise run **AskUserQuestion** once per phase (or one bundled multi-question), each with options drawn **only** from **`availableTransitionNames`** plus a literal `skip` option. Wording: "Which Jira transition should fire when a ticket enters **`phase:<name>`**?" Capture the answers as `transition_context_backlog`, `transition_in_research`, `transition_in_planning`, `transition_in_build`, `transition_in_review`, `transition_completed`. A value of `skip` means: do not call `transitionJiraIssue` for that phase; the label swap is sufficient.
+  4. Persist this mapping in `workflow.md` (step 6 · Option B writes it under **Ticket Tracker — Jira → Phase → Transition map**).
 
 - **Do not create GitHub labels or a GitHub Project** on this branch. Skip step 5a-A entirely.
 
@@ -209,6 +215,13 @@ Then execute **only** the sub-branch matching `BACKEND`.
   - `Issue type — Bug` → captured `bugIssueType`
   - `Issue type — Work Order` → captured `workOrderIssueType`
   - `Issue type — Context` → captured `contextIssueType`
+  - **Phase → Transition map** rows — write the captured transition values verbatim (or the literal string `skip`):
+    - `phase:context-backlog` → `transition_context_backlog`
+    - `phase:in-research`     → `transition_in_research`
+    - `phase:in-planning`     → `transition_in_planning`
+    - `phase:in-build`        → `transition_in_build`
+    - `phase:in-review`       → `transition_in_review`
+    - `phase:completed`       → `transition_completed`
   - The JQL example at the bottom of the section: replace `[CONFIGURE: PROJ]` with the captured `projectKey`.
 - Replace the entire **## Ticket Tracker — GitHub** section body (everything from the first bullet through the end of the **Key Commands (GitHub)** code block) with:
 

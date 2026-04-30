@@ -32,7 +32,7 @@ First, read the **Backend:** field in `workflow.md` to determine whether this pr
 Then execute these steps in order:
 1. Move the ticket to **In Research**:
    - **GitHub backend:** update the Status field on the project board using the option ID from workflow.md (GraphQL mutation in the **Key Commands (GitHub)** block) and the `project_item_id` from ticket.md frontmatter.
-   - **Jira backend:** via the Atlassian MCP, remove any existing `phase:*` label from the Jira issue (`jira_issue` in ticket.md frontmatter) and add `phase:in-research`.
+   - **Jira backend:** via the Atlassian MCP, remove any existing `phase:*` label from the Jira issue (`jira_issue` in ticket.md frontmatter) and add `phase:in-research`. Then read the **Phase → Transition map** from `workflow.md`. If the row for `phase:in-research` is not `skip`, call `getTransitionsForJiraIssue` on `{jira_issue}`, match the configured transition name case-insensitively against `transitions[].name` to get its `id`, then call `transitionJiraIssue` with that `id`. If the configured name is not currently available (workflow guard) or the row is `skip`, continue without erroring — the label swap is authoritative.
 2. Understand the ticket's Problem Story, Requirements, and Success Criteria.
 3. Research $1 thoroughly — use web search, read relevant files in the repo, and consult any references linked in ticket.md.
 4. Create the directory $0/research/ if it does not exist.

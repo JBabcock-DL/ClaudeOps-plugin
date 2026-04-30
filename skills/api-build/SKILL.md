@@ -63,7 +63,7 @@ Execution:
 2. Read plan.md and identify each unchecked step
 3. Move the ticket to **In Build**, using the method determined by the **Backend:** field in workflow.md:
    - **GitHub backend:** GraphQL mutation from the **Key Commands (GitHub)** block using the In Build option ID and the ticket's `project_item_id`.
-   - **Jira backend:** via the Atlassian MCP `editJiraIssue` tool on the ticket's `jira_issue` — swap any `phase:*` label to `phase:in-build`.
+   - **Jira backend:** via the Atlassian MCP `editJiraIssue` tool on the ticket's `jira_issue` — swap any `phase:*` label to `phase:in-build`. Then read the **Phase → Transition map** from `workflow.md`. If the row for `phase:in-build` is not `skip`, call `getTransitionsForJiraIssue` on `{jira_issue}`, match the configured transition name case-insensitively against `transitions[].name` to get its `id`, then call `transitionJiraIssue` with that `id`. If the configured name is not currently available (workflow guard) or the row is `skip`, continue without erroring — the label swap is authoritative.
 4. Execute each step — read existing integration patterns in the repo before writing new ones
 5. Check off each step in plan.md as you complete it
 6. Record API endpoints used, SDK version, auth method, and any gotchas under Notes in plan.md
