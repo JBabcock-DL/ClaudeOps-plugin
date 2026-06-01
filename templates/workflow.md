@@ -32,11 +32,15 @@ memory.md                  # Short running memory to save agent context (see Con
 │   ├── context.md         # Template for context tickets
 │   └── agent-handoff.md   # Prompt block for new agent sessions
 └── Sprint {N}/            # One folder per sprint
-    └── {TICKET-ID}-{slug}/  # One folder per ticket (BUG-###, WO-###, or CTX-###)
-        ├── ticket.md        # The ticket definition (synced to the backend)
-        ├── plan.md          # Implementation approach and step checklist (not created for CTX tickets until promoted)
-        ├── research/        # Data, findings, reference docs (.md, .json, etc.)
-        └── scripts/         # Any automation, tooling, or helper scripts
+    ├── {TICKET-ID}-{slug}/  # One folder per ticket (BUG-###, WO-###, or CTX-### at sprint root)
+    │   ├── ticket.md        # The ticket definition (synced to the backend)
+    │   ├── plan.md          # Implementation approach and step checklist (not created for CTX tickets until promoted)
+    │   ├── context/         # Present after CTX promotion — archived CTX-### capture (verbatim handoff)
+    │   │   └── CTX-###-{slug}/
+    │   │       └── ticket.md
+    │   ├── research/        # Data, findings, reference docs (.md, .json, etc.)
+    │   └── scripts/         # Any automation, tooling, or helper scripts
+    └── CTX-###-PROMOTED.md  # Tombstone after promotion — points at archived context under {BUG|WO}-###/
 ```
 
 ### memory.md and CLAUDE.md (recommended)
@@ -67,6 +71,8 @@ A context ticket stays in **Context Backlog** until it is **promoted** into the 
 - `/create-ticket promote {CTX-ID}` — interactively promote a single CTX ticket into a `bug` or `work-order`
 - `/create-backlog` — bulk-triage every unpromoted CTX ticket in the current sprint, classifying each into a `bug` or `work-order` (with user confirmation per ticket)
 
+**On promotion**, the workflow creates a **new** `{BUG|WO}-###-{slug}/` folder, **moves** the original CTX folder into `{BUG|WO}-###/context/CTX-###-{slug}/` (verbatim — including Figma design reference, requirements, and any `research/`), writes a re-templated `ticket.md` on the parent with `promoted_from: CTX-###` and a **References** link to the archive, and relabels the remote issue in place. A sprint-root tombstone `CTX-###-PROMOTED.md` points at the archive for discovery.
+
 The `/research`, `/plan`, `/build`, and `/vqa` skills refuse to run on an un-promoted `CTX-*` ticket and will point the user at `/create-ticket promote` or `/create-backlog` first.
 
 ---
@@ -77,8 +83,8 @@ The `/research`, `/plan`, `/build`, and `/vqa` skills refuse to run on an un-pro
 1. **Create ticket** — `/create-ticket` requires a configured **Ticket Backend** in `workflow.md`, creates the **remote** issue first (GitHub Issue + Project, or Jira), then writes the sprint folder, `ticket.md`, and stub `plan.md` (bug / work-order only), with board/status: **Context Backlog**
 2. **Research** *(optional, recommended for unfamiliar work)* — `/research` investigates the problem domain and writes findings to `research/`; moves ticket to **In Research**
 3. **Plan** — `/plan` enters plan mode for interactive review, writes the approved plan to `plan.md` (including a `## Build Agents` section defining parallel phases), and moves ticket to **In Planning**
-4. **Build** — `/build` reads the `## Build Agents` section, moves ticket to **In Build**, and spawns build agents in parallel phases; agents within a phase run simultaneously, phases run sequentially. Individual build skills (`/code-build`, `/doc-build`, `/script-build`, `/api-build`, `/figma-build`) can be used directly for single-domain tickets.
-5. **Verify** — `/vqa` runs a Figma-first QA pass: it requires the **Figma VQA Checklist** in `ticket.md` to either have `file_key` + `node_id` filled or be explicitly marked `**N/A — no Figma artifact**`. The agent pulls the design from Figma via MCP, captures the implemented build, fills the assertion table 1:1, then runs Functional QA. Moves ticket to **In Review** → **Completed** when every assertion passes.
+4. **Build** — `/build` reads the `## Build Agents` section, moves ticket to **In Build**, and spawns build agents in parallel phases. When the ticket references Figma, `/build` pulls live design context via Figma MCP first (see **`skills/conventions/03-figma-design-truth.md`**) and writes `research/figma-design-truth.md` — **`plan.md` and `research/` are not the visual spec.** Individual build skills (`/code-build`, `/doc-build`, `/script-build`, `/api-build`, `/figma-build`) can be used directly for single-domain tickets.
+5. **Verify** — `/vqa` runs a Figma-first QA pass: fresh Figma MCP pull is the **Design** column truth; implemented code/DOM is the **Build** column truth — not research or plan prose. Requires **Figma VQA Checklist** with `file_key` + `node_id` or explicit N/A. Fills the assertion table 1:1, then Functional QA. Moves ticket to **In Review** → **Completed** when every assertion passes.
 
 > Skip research for well-understood, mechanical tickets where requirements are unambiguous.
 
@@ -267,7 +273,8 @@ Use when a work order involves:
 
 - `CLAUDE.md` at the repository root (from `/project-start`) must keep its **Agent rules** so Claude reads and updates `memory.md` without the user asking. **`memory.md`** holds short, project-wide facts; update it when something stable and reusable changes. Do not use either file to replace `ticket.md` or `plan.md` for a specific ticket
 - Ticket IDs are sequential per type (`BUG-001`, `BUG-002`, `WO-001`, `WO-002`, `CTX-001`, `CTX-002`) and are always prefixed onto the remote issue title
-- When a `CTX-###` ticket is promoted, the folder is renamed to the next `BUG-###` or `WO-###` in sequence, the ticket body is re-templated, and the remote issue is relabeled / retyped in place. The ticket.md frontmatter records `promoted_from: CTX-###` so history is preserved.
+- When a `CTX-###` ticket is promoted, a **new** `{BUG|WO}-###-{slug}/` folder is created, the original CTX folder is **archived** at `{BUG|WO}-###/context/CTX-###-{slug}/` (full Figma handoff preserved), the parent `ticket.md` is re-templated with `promoted_from: CTX-###` and `context_capture:` pointing at the archive, and the remote issue is relabeled / retyped in place. A sprint-root `CTX-###-PROMOTED.md` tombstone aids discovery.
+- **Figma-backed UI tickets:** follow **`skills/conventions/03-figma-design-truth.md`** at `/build`, `/code-build`, `/plan`, and `/vqa` — live Figma MCP over `plan.md` / `research/`.
 - Sprint folders are named `Sprint {N}` — do not use dates
 - All `ticket.md` files include frontmatter fields for the remote issue:
   - **GitHub backend**: `github_issue` (issue number) and `project_item_id` (PVTI_…)

@@ -21,9 +21,12 @@ Do not proceed until confirmed.
 Before reviewing anything, read these files in order:
 1. memory.md (if it exists in the repo root) — project running memory; skip if missing or empty
 2. workflow.md — resolve path per skills/conventions/01-plugin-root-and-templates.md
-3. $ARGUMENTS/ticket.md
-4. $ARGUMENTS/plan.md
-5. Any files in $ARGUMENTS/research/ if they exist
+3. **`skills/conventions/03-figma-design-truth.md`** — Figma is the comparison baseline, not research/plan
+4. $ARGUMENTS/ticket.md
+5. If `ticket.md` frontmatter has `context_capture:` or **References** links to `./context/CTX-*`, read that archived context `ticket.md` — prefer its **Design reference** (file key, node ID, frame name) when the promoted ticket's **Figma VQA Checklist** is incomplete.
+6. $ARGUMENTS/plan.md — **execution record only; not the design spec for assertion rows**
+7. Any files in $ARGUMENTS/research/ if they exist — **do not use research prose as Design (Figma) column values**
+8. Any files in $ARGUMENTS/context/*/research/ if the ticket was promoted from a CTX capture
 
 **CTX guard.** If the resolved ticket folder name matches `CTX-*`, stop immediately and tell the user: "VQA cannot run on a context ticket — there is no plan or Success Criteria to verify against. Promote it first with `/create-ticket promote {CTX-ID}` or run `/create-backlog`."
 
@@ -42,7 +45,9 @@ Anything else — missing section, blank `file_key` / `node_id`, half-filled row
 
 If the user gives you a Figma URL during this step, parse it, write the parsed values back to `ticket.md` under **Figma VQA Checklist → Figma source**, then continue.
 
-## Step 2 — Pull design context from Figma
+## Step 2 — Pull design context from Figma (fresh — authoritative baseline)
+
+**This pull is the Design (Figma) column truth.** Do not copy assertion values from `research/*.md`, `plan.md`, or ticket Requirements prose — even if they exist. Re-fetch from Figma even when `research/figma-design-truth.md` from build is present (build snapshot is context only; VQA compares against **current** Figma).
 
 Using the Figma MCP, in this order:
 
@@ -57,13 +62,17 @@ Stamp the **Captured at** field in the Figma source block with today's ISO date.
 
 For each surface delivered by this ticket, record the **Build (implemented)** side of the comparison:
 
-- Read the actual implementation files referenced in `plan.md` (component source, stylesheets, token usage) — do not guess.
+- Read the **actual implementation files** referenced in `plan.md` (component source, stylesheets, token usage) — do not guess and do not trust plan checkmarks as proof of correctness.
 - If a dev server is described in `memory.md` or the repo, render the surface and screenshot it into `$ARGUMENTS/research/build-screenshot.png`. If no dev server is documented, note that explicitly in the Notes section of `vqa-report.md` and proceed with code-only comparison; do not invent a server command.
-- For each row of the assertion table, extract the implemented value (computed CSS, design-token name, JSX prop, accessibility attribute) — never blank a row.
+- For each row of the assertion table, extract the implemented value (computed CSS, design-token name, JSX prop, accessibility attribute) from **code/DOM** — never blank a row.
 
-## Step 4 — Run the assertion sweep (1:1 to Figma)
+## Step 4 — Run the assertion sweep (1:1: Figma MCP vs implemented build)
 
-Walk every row of the **Figma VQA Checklist → Assertions** table in `ticket.md` and fill it in via the Edit tool. Rules:
+Walk every row of the **Figma VQA Checklist → Assertions** table in `ticket.md` and fill it in via the Edit tool.
+
+**Comparison rule:** **Design (Figma)** ← fresh MCP pull (Step 2). **Build (implemented)** ← actual code/render (Step 3). If research or plan disagrees with Figma, Figma wins for the Design column; if build matches research but not Figma, mark **FAIL**.
+
+Rules:
 
 - **Result column values are exactly `PASS`, `FAIL`, or `N/A`** — no other strings.
 - `PASS` requires byte-equal token names (e.g. `--space-md`) **or** numeric tolerance ≤ 1px / ≤ 1% for sizes, ≤ 0.5 for line-height, exact match for font-family / font-weight / hex colors / radius.

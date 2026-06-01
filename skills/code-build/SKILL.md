@@ -46,9 +46,22 @@ Apply the strategy at the right moments:
 Before writing any code, read these files in order:
 1. memory.md (if it exists in the repo root) — project running memory; skip if missing or empty
 2. workflow.md — resolve path per skills/conventions/01-plugin-root-and-templates.md
-3. $ARGUMENTS/ticket.md
-4. $ARGUMENTS/plan.md
-5. Any files in $ARGUMENTS/research/ if they exist
+3. **`skills/conventions/03-figma-design-truth.md`**
+4. $ARGUMENTS/ticket.md
+5. If `ticket.md` frontmatter has `context_capture:` or **References** links to `./context/CTX-*`, read that archived context `ticket.md`
+6. $ARGUMENTS/plan.md
+7. `$ARGUMENTS/research/figma-design-truth.md` when present
+8. Other files in $ARGUMENTS/research/ — **supporting context only; never override Figma design truth for UI specs**
+
+### Figma grounding (mandatory for UI steps)
+
+Per **`03-figma-design-truth.md`**, if your assigned steps touch UI and the ticket has a Figma surface:
+
+1. Read **`research/figma-design-truth.md`** and **`research/figma-design-truth.png`** (written by `/build` orchestrator or a prior agent).
+2. If missing, **hard stop** — pull Figma MCP (`get_design_context`, `get_variable_defs`, `get_screenshot`) using resolved `file_key` + `node_id`, write the snapshot files, **then** implement.
+3. **Do not** implement layout, typography, tokens, copy, or component structure from `plan.md` or `research/*.md` alone when Figma applies.
+4. Use **exact** token names, **exact** copy, and **Code Connect** targets from the Figma snapshot.
+5. Record intentional deviations in `plan.md` **Notes** (Figma value vs built value).
 
 Rules:
 - Do not start if plan.md has no steps defined — report back that the plan needs to be written first
@@ -59,11 +72,12 @@ Rules:
 
 Execution:
 1. Read the ticket's Requirements and Success Criteria fully
-2. Read plan.md and identify each unchecked step
-3. Move the ticket to **In Build**, using the method determined by the **Backend:** field in workflow.md:
+2. **If UI work:** confirm Figma design truth is loaded per above — refresh MCP if stale
+3. Read plan.md and identify each unchecked step
+4. Move the ticket to **In Build**, using the method determined by the **Backend:** field in workflow.md:
    - **GitHub backend:** GraphQL mutation from the **Key Commands (GitHub)** block using the In Build option ID and the ticket's `project_item_id`.
    - **Jira backend:** **Skip this step entirely if you were spawned by `/build`** — the orchestrator owns the phase boundary. When invoked directly (no orchestrator), run the canonical phase-transition procedure in `skills/conventions/02-jira-phase-transition.md` with `TARGET_PHASE = phase:in-build`. In short: `getJiraIssue` → drop existing `phase:*` and append `phase:in-build` while preserving `claude-ops` + the type label → `editJiraIssue` with the **full** new labels array (never call `editJiraIssue` with only the phase label — it replaces the array) → re-read and verify → then optionally fire the configured transition from the **Phase → Transition map**.
-4. Execute each step — read relevant existing files before editing or creating any file
-5. Check off each step in plan.md as you complete it
-6. Record key decisions, file paths changed, and any deviations from the plan under Notes in plan.md
-7. Report back: what was built, files changed, and current plan.md state
+5. Execute each step — read relevant existing files before editing or creating any file; for UI steps, cross-check against **`research/figma-design-truth.md`** continuously
+6. Check off each step in plan.md as you complete it
+7. Record key decisions, file paths changed, and any deviations from the plan under Notes in plan.md
+8. Report back: what was built, files changed, whether Figma design truth was used, and current plan.md state

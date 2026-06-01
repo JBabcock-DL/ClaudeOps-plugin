@@ -36,10 +36,20 @@ Do not proceed until the strategy is confirmed.
 Before starting, read these files in order:
 1. memory.md (if it exists in the repo root) — project running memory; skip if missing or empty
 2. workflow.md — resolve path per skills/conventions/01-plugin-root-and-templates.md
-3. $ARGUMENTS/ticket.md
-4. $ARGUMENTS/plan.md
+3. **`skills/conventions/03-figma-design-truth.md`** — Figma authority rules for build orchestration
+4. $ARGUMENTS/ticket.md
+5. If `ticket.md` frontmatter has `context_capture:` or **References** links to `./context/CTX-*`, read that archived context `ticket.md` — use its **Design reference**, **Requirements**, and **Notes for build agent** when Figma fidelity matters.
+6. $ARGUMENTS/plan.md
 
 **CTX guard.** If the resolved ticket folder name matches `CTX-*`, stop immediately and tell the user: "Build cannot run on a context ticket — promote it first with `/create-ticket promote {CTX-ID}` or run `/create-backlog`."
+
+### Figma design truth (mandatory before spawn)
+
+Per **`skills/conventions/03-figma-design-truth.md`**, determine whether this ticket has a Figma surface.
+
+- **If yes:** resolve `file_key` + `node_id`. Hard stop if unresolved — UI build agents must not run blind.
+- **Before step 3 (spawn agents):** pull fresh design context via the Figma MCP (`get_design_context`, `get_variable_defs`, `get_screenshot`, `get_metadata` as needed). Write **`$ARGUMENTS/research/figma-design-truth.md`** and **`$ARGUMENTS/research/figma-design-truth.png`**. If Figma MCP is unavailable, stop and report — do not proceed with UI work.
+- **`research/` and `plan.md` are not authoritative for visual specs.** The MCP snapshot is.
 
 Rules:
 - Do not start if `$ARGUMENTS/plan.md` is missing, empty, a stub, or has no steps — report back that the plan was never persisted to the ticket folder. If the user planned in an IDE that uses a sidecar plan file (e.g. Cursor's `.plan.md` or any in-memory plan-mode buffer), tell them to re-run `/plan` so the full plan is written to `$ARGUMENTS/plan.md`; build agents cannot read IDE-local sidecars.
@@ -58,8 +68,21 @@ Execution steps (in order):
 3. For each phase, spawn one Agent tool call PER domain IN PARALLEL (single message, multiple Agent tool calls). Each agent prompt must include:
    - The full contents of $ARGUMENTS/ticket.md
    - The full contents of $ARGUMENTS/plan.md
-   - The full contents of .claude/skills/{domain}-build/SKILL.md
+   - The full contents of `.claude/skills/{domain}-build/SKILL.md`
    - The specific steps the agent is responsible for
+   - **When the ticket has a Figma surface:** a **Figma design truth** block:
+
+     ```
+     Figma design truth (authoritative — overrides plan.md and research/ for UI):
+     file_key: {key}
+     node_id: {id}
+     Deep link: {url}
+     Snapshot: $ARGUMENTS/research/figma-design-truth.md
+     Screenshot: $ARGUMENTS/research/figma-design-truth.png
+
+     You MUST read the snapshot before any UI work. Do not implement layout, tokens, copy, or components from plan prose alone. Re-pull Figma MCP if the snapshot is missing.
+     ```
+
    - A **Git strategy** block with the value collected above. Format it exactly like this so the agent's Git strategy rules pick it up:
 
      ```
@@ -76,4 +99,4 @@ Execution steps (in order):
 
 5. After all phases complete, read plan.md and verify all steps are checked off. Report any unchecked steps as blockers.
 
-6. Report back: which agents ran, which phases completed, any failures or unchecked steps, any PR URLs opened by agents (if `branch-per-agent`) or the list of uncommitted file paths (if `main`), and confirm the ticket is ready for `/vqa`.
+6. Report back: which agents ran, which phases completed, any failures or unchecked steps, any PR URLs opened by agents (if `branch-per-agent`) or the list of uncommitted file paths (if `main`), path to **`research/figma-design-truth.md`** when Figma applied, and confirm the ticket is ready for `/vqa`.

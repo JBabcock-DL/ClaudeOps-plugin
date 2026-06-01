@@ -80,7 +80,13 @@ Parse `$ARGUMENTS` for a sprint number.
 
 ### Local discovery
 
-Scan `.github/Sprint {N}/CTX-*/` for unpromoted tickets. A CTX ticket is **already promoted** if its `ticket.md` has `promoted_to:` in frontmatter **or** a sibling tombstone `CTX-###-PROMOTED.md` exists. A CTX ticket is **unpromoted** otherwise.
+Scan **sprint-root** `.github/Sprint {N}/CTX-*/` for unpromoted tickets (direct children of the sprint folder only — not folders already archived under `{BUG|WO}-###/context/CTX-*/`). A CTX ticket is **already promoted** if any of:
+
+- its `ticket.md` has `promoted_to:` in frontmatter
+- a sibling tombstone `CTX-###-PROMOTED.md` exists at the sprint root
+- the same `CTX-###` ID exists under any `{BUG|WO}-###-*/context/CTX-###-*/` in that sprint
+
+A CTX ticket is **unpromoted** otherwise.
 
 ### Remote discovery
 
@@ -172,9 +178,9 @@ For each entry marked for promotion, invoke `create-ticket` via the Skill tool w
 - **`DELEGATED_BACKEND={github|jira}`** — skip workflow.md re-read.
 - **`DELEGATED_TYPE={bug|wo}`** — skip type prompt.
 - **`DELEGATED_TITLE={refined title}`** — skip title prompt.
-- **`DELEGATED_REMOTE_ONLY=true`** — set when this entry is remote-only **and** the user did not opt to mirror. Causes `create-ticket promote` to skip folder rename, `ticket.md` rewrite, and tombstone — only relabels/retypes the remote issue.
+- **`DELEGATED_REMOTE_ONLY=true`** — set when this entry is remote-only **and** the user did not opt to mirror. Causes `create-ticket promote` to skip local folder creation and context archiving — the full CTX body is posted as a remote comment instead. Only relabels/retypes the remote issue.
 
-Process promotions **sequentially**, not in parallel — each promotion renames a folder and bumps the per-type ID counter (`BUG-###` / `WO-###`), so parallel runs would collide on ID allocation.
+Process promotions **sequentially**, not in parallel — each promotion allocates the next per-type ID counter (`BUG-###` / `WO-###`) and moves a CTX folder into a new `{BUG|WO}-###/context/` archive, so parallel runs would collide on ID allocation.
 
 Wait for each `create-ticket promote` call to complete before starting the next.
 
@@ -190,7 +196,7 @@ For mirror operations triggered in Step 5 hybrid choice, materialize the local f
   - Backend used (`github` or `jira`)
   - Triage mode used
   - Total CTX entries scanned (split: local+remote / remote-only / local-only orphans)
-  - Promoted to `bug`: list of `{CTX-ID-or-key} → BUG-###` (or remote-only key) with new folder path when mirrored and remote URL/key
+  - Promoted to `bug`: list of `{CTX-ID-or-key} → BUG-###` (or remote-only key) with new folder path, **context archive path** when mirrored, and remote URL/key
   - Promoted to `work-order`: same shape
   - Skipped: list with IDs
   - Deleted: list with IDs

@@ -233,15 +233,15 @@ If the remote sync in step 4 fails, **do not** create the sprint folder or **`ti
 
 ## Mode B — Promote (`/create-ticket promote CTX-###`)
 
-This mode converts an existing **context** ticket into a `bug` or `work-order`, keeping the remote issue in place (relabel / retype) and preserving history via a `promoted_from` frontmatter field.
+This mode converts an existing **context** ticket into a `bug` or `work-order`, keeping the remote issue in place (relabel / retype). The **original CTX folder is preserved** under the promoted ticket at `context/CTX-###-{slug}/` so Figma handoff scaffolds, screenshots, and raw notes are never destroyed by re-templating. The promoted `ticket.md` records `promoted_from: CTX-###` and links to the archived capture in **References**.
 
 ### Locate the source CTX ticket
 
 Parse `$1`. It can be:
-- A ticket ID like `CTX-001` — scan `.github/Sprint */` for the matching `CTX-001-*` folder.
+- A ticket ID like `CTX-001` — scan **sprint-root only** for the matching `CTX-001-*` folder (direct child of `.github/Sprint {N}/`, not already nested under another ticket's `context/` folder).
 - A full folder path like `.github/Sprint 1/CTX-001-designer-dump`.
 
-If `$1` is empty or not found, AskUserQuestion: "Which context ticket should I promote?" and list every unpromoted `CTX-*` folder found under `.github/Sprint */` (skipping any whose ticket.md already has `promoted_to:` in frontmatter).
+If `$1` is empty or not found, AskUserQuestion: "Which context ticket should I promote?" and list every unpromoted sprint-root `CTX-*` folder found under `.github/Sprint */` (skipping any whose `ticket.md` already has `promoted_to:` in frontmatter, any folder already under `*/context/CTX-*`, and any legacy tombstone `CTX-###-PROMOTED.md` sibling).
 
 Read the located `.github/Sprint {N}/CTX-###-{slug}/ticket.md`. Note the current `github_issue` + `project_item_id` **or** `jira_issue` + `jira_issue_id` frontmatter.
 
@@ -260,26 +260,33 @@ Also AskUserQuestion for a **clean title**:
 
 ### Remote-only delegation
 
-If **`DELEGATED_REMOTE_ONLY=true`**, skip every local file mutation (steps 1–6 of Execute the promote flow that touch folders / `ticket.md` / tombstone). Run only the remote update branch (GitHub or Jira) plus a remote comment recording `Promoted from {OLD-ID} to {NEW-ID} on {YYYY-MM-DD}` (since there is no local frontmatter `promoted_from` to write). The remote issue title still gets the new `{NEW-ID}: {title}` prefix and the new label set.
+If **`DELEGATED_REMOTE_ONLY=true`**, skip every local file mutation (steps 1–7 of Execute the promote flow that touch folders / `ticket.md` / tombstone). Run only the remote update branch (GitHub or Jira). Because there is no local `context/` archive, **append the full original CTX body** to the remote issue as a comment titled `Archived context capture (CTX-###)` before updating the issue description — so Figma file keys, node IDs, and handoff scaffolds are not lost. Also add a remote comment recording `Promoted from {OLD-ID} to {NEW-ID} on {YYYY-MM-DD}`. The remote issue title still gets the new `{NEW-ID}: {title}` prefix and the new label set.
 
 ### Execute the promote flow
 
-1. Compute the next sequential ID for the chosen target type (scan `BUG-*` or `WO-*` folders across `.github/Sprint */`).
+1. Compute the next sequential ID for the chosen target type — scan **sprint-root** `BUG-*` or `WO-*` folders only (direct children of `.github/Sprint {N}/`, not paths under another ticket's `context/` folder).
 2. Generate a new slug from the (possibly refined) title.
-3. Rename the folder: `.github/Sprint {N}/CTX-###-{old-slug}/` → `.github/Sprint {N}/{BUG|WO}-###-{new-slug}/`.
-4. Replace the body of `ticket.md` with the correct template (`bug_report.md` or `work_order.md`) using **`skills/conventions/01-plugin-root-and-templates.md`**, **migrating the salient content** from the CTX body:
-   - **Goal**, **Design reference**, **Requirements** (all subsections), **Acceptance criteria**, **Out of scope**, and **Notes for build agent** — when present (design-handoff `context.md`), map into **Requirements** / **Success Criteria** / **References** as appropriate for the target template; do not drop actionable bullets.
-   - **Source** and **Raw Notes** → merged into **Additional Context** (bug) or the top of **Problem Story** / **Hypothesis** (work order), unless already folded into Requirements above.
-   - **Observed Problems / Opportunities** → seed entries for **Requirements**.
-   - **Assets & Links** → **References**.
-   - **Related Tickets** → **References**.
-   - Preserve the original CTX body verbatim at the bottom under a collapsible `<details><summary>Original context capture (CTX-###)</summary>…</details>` block so nothing is lost.
-5. Update frontmatter on the new ticket.md:
+3. **Create** the promoted folder `.github/Sprint {N}/{BUG|WO}-###-{new-slug}/` — do **not** rename the CTX folder in place.
+4. **Archive the context capture:** move the entire source folder `.github/Sprint {N}/CTX-###-{old-slug}/` (including `ticket.md`, `research/`, `scripts/`, and any other files) to `.github/Sprint {N}/{BUG|WO}-###-{new-slug}/context/CTX-###-{old-slug}/`. Update the archived `context/.../ticket.md` frontmatter:
+   - Add `promoted_to: {BUG|WO}-###`.
+   - Keep `type: context`.
+   - Remove `github_issue`, `project_item_id`, `jira_issue`, and `jira_issue_id` — the remote issue is now owned by the promoted parent `ticket.md` (same remote record, relabeled in place). Add a one-line HTML comment at the top of the body if helpful: `<!-- Remote issue tracked on parent ../ticket.md -->`.
+5. Write the promoted `ticket.md` using the correct template (`bug_report.md` or `work_order.md`) per **`skills/conventions/01-plugin-root-and-templates.md`**, **migrating salient content** from the archived CTX body for day-to-day work — while treating the nested archive as the **authoritative** full capture:
+   - **Goal**, **Design reference**, **Requirements** (all subsections), **Acceptance criteria**, **Out of scope**, and **Notes for build agent** — map into the target template's **Goal**, **Design reference**, **Requirements**, **Acceptance criteria** / **Success Criteria**, and build-ready sections. Do not drop actionable bullets during migration.
+   - **Design reference → Figma VQA Checklist:** when the archived CTX has **File key** and **Node ID** in its Design reference table, copy them into the promoted ticket's **Design reference** table **and** into the **Figma VQA Checklist** `file_key` / `node_id` / deep-link rows — `/vqa` and `/figma-build` depend on these surviving promotion.
+   - **Source** and **Raw Notes** → **Additional Context** (bug) or **Problem story** / **Hypothesis** (work order), unless already folded above.
+   - **Observed Problems / Opportunities** → seed **Requirements**.
+   - **Assets & Links** and **Related Tickets** → **References**.
+   - In **References**, **always** add as the first bullet: `- **Context capture (authoritative):** [CTX-### — original handoff](./context/CTX-###-{old-slug}/ticket.md) — full Figma scaffold, design reference, and raw notes preserved at promotion. Agents should read this when `/plan`, `/build`, or `/vqa` need canvas fidelity beyond the migrated summary.`
+   - Do **not** embed a duplicate full CTX body in the promoted ticket — the nested archive is the single verbatim copy.
+6. Update frontmatter on the promoted `ticket.md`:
    - Change `type:` to `bug` or `work-order`.
-   - Keep the existing remote IDs (`github_issue` / `project_item_id`, or `jira_issue` / `jira_issue_id`) — the remote issue is not re-created.
+   - Keep the existing remote IDs (`github_issue` / `project_item_id`, or `jira_issue` / `jira_issue_id`) from the archived CTX — the remote issue is not re-created.
    - Add `promoted_from: CTX-###`.
-6. Keep the old CTX **number reserved** — do not reuse `CTX-###` later. (Since we renamed the folder, no CTX-### folder will exist anymore; leave a tombstone in `.github/Sprint {N}/CTX-###-PROMOTED.md` containing a single line: `Promoted to {BUG|WO}-### on {YYYY-MM-DD}. See ./{new-folder}/ticket.md.`)
-7. Update the remote issue to reflect the new type and ID — **only if** **`BACKEND`** is **`github`** or **`jira`** (from **`workflow.md`**) **and** the ticket’s remote ID fields are not **`TBD`**. Otherwise **skip** the GitHub/Jira subsections below and report that the local promote finished without a remote update (configure **`workflow.md`** and real remote IDs before expecting the tracker to match). When **`DELEGATED_REMOTE_ONLY=true`**, the remote update is the only output — there is no local folder, no `ticket.md`, no tombstone.
+   - Add `context_capture: context/CTX-###-{old-slug}/` (relative path from the promoted folder).
+7. Write a stub **`plan.md`** for the promoted ticket (same as create mode for `bug` / `wo`).
+8. Keep the CTX **number reserved** — do not reuse `CTX-###` later. Leave a sprint-root tombstone `.github/Sprint {N}/CTX-###-PROMOTED.md` for discovery: `Promoted to {BUG|WO}-### on {YYYY-MM-DD}. Context archived at ./{BUG|WO}-###-{new-slug}/context/CTX-###-{old-slug}/ticket.md`
+9. Update the remote issue to reflect the new type and ID — **only if** **`BACKEND`** is **`github`** or **`jira`** (from **`workflow.md`**) **and** the ticket’s remote ID fields are not **`TBD`**. Otherwise **skip** the GitHub/Jira subsections below and report that the local promote finished without a remote update (configure **`workflow.md`** and real remote IDs before expecting the tracker to match). When **`DELEGATED_REMOTE_ONLY=true`**, the remote update is the only output — there is no local folder, no `ticket.md`, no tombstone (but the archived-context comment from **Remote-only delegation** must still be posted).
 
 #### Backend: GitHub
 
@@ -304,6 +311,7 @@ Use the Atlassian MCP. **Before** choosing the target **`issuetype`**, call **`g
 - Source: `CTX-### — {old title}`
 - Target: `{BUG|WO}-### — {new title}`
 - New folder path
+- Context archive path: `{BUG|WO}-###-…/context/CTX-###-…/ticket.md`
 - Backend used
 - **If GitHub:** issue URL (unchanged), confirmation that labels and title were updated
 - **If Jira:** issue key (unchanged), confirmation that labels, summary, and (if successful) issue type were updated; any fallback notes

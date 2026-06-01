@@ -48,22 +48,26 @@ Apply the strategy at the right moments:
 Before touching Figma, read these files in order:
 1. memory.md (if it exists in the repo root) — project running memory; skip if missing or empty
 2. workflow.md — resolve path per skills/conventions/01-plugin-root-and-templates.md
-3. $ARGUMENTS/ticket.md
-4. $ARGUMENTS/plan.md
+3. **`skills/conventions/03-figma-design-truth.md`**
+4. $ARGUMENTS/ticket.md
+5. If `ticket.md` frontmatter has `context_capture:` or **References** links to `./context/CTX-*`, read that archived context `ticket.md` — its **Design reference** and **Requirements** are authoritative for canvas work after `/dev-handoff` promotion.
+6. $ARGUMENTS/plan.md
+7. `$ARGUMENTS/research/figma-design-truth.md` when present
 
 Rules:
 - Do not modify ticket.md or the remote issue (GitHub or Jira) — your job is Figma work only
 - Do not start if plan.md has no steps defined — report back that the plan needs to be written first
-- Use the Figma MCP tools (mcp__claude_ai_Figma__*) for all canvas operations
-- The Figma file URL lives in ticket.md under References — use it to locate the file
+- Use the Figma MCP for all canvas operations — **live Figma state overrides plan.md and research/**
+- Resolve `file_key` + `node_id` per `03-figma-design-truth.md` before editing the canvas
 
 Execution:
-1. Read the ticket's Requirements and Success Criteria sections fully
-2. Read plan.md and identify each unchecked step
-3. Execute each step using the Figma MCP
-4. Check off each step in plan.md as you complete it
-5. Record the Figma file URL and any relevant node IDs in plan.md under Notes
-6. Move the ticket to **In Build**, using the method determined by the **Backend:** field in workflow.md:
+1. Pull fresh Figma MCP context for the target node(s) — do not rely on plan prose alone
+2. Read the ticket's Requirements and Success Criteria sections fully
+3. Read plan.md and identify each unchecked step
+4. Execute each step using the Figma MCP, grounded in the live design context
+5. Check off each step in plan.md as you complete it
+6. Record the Figma file URL and any relevant node IDs in plan.md under Notes
+7. Move the ticket to **In Build**, using the method determined by the **Backend:** field in workflow.md:
    - **GitHub backend:** GraphQL mutation from the **Key Commands (GitHub)** block using the In Build option ID and the ticket's `project_item_id`.
    - **Jira backend:** **Skip this step entirely if you were spawned by `/build`** — the orchestrator owns the phase boundary. When invoked directly (no orchestrator), run the canonical phase-transition procedure in `skills/conventions/02-jira-phase-transition.md` with `TARGET_PHASE = phase:in-build`. In short: `getJiraIssue` → drop existing `phase:*` and append `phase:in-build` while preserving `claude-ops` + the type label → `editJiraIssue` with the **full** new labels array (never call `editJiraIssue` with only the phase label — it replaces the array) → re-read and verify → then optionally fire the configured transition from the **Phase → Transition map**.
 7. Report back: what was built, node IDs created, and current plan.md state

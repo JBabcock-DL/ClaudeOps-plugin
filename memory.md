@@ -34,7 +34,7 @@ You **must** do this without the user having to ask:
 
 - **Global workflow + IDs:** **`workflow.md`** — resolve per **`skills/conventions/01-plugin-root-and-templates.md`** (typically **`REPO_ROOT/.github/templates/workflow.md`** after **`/project-start`**, else **`PLUGIN_ROOT/templates/workflow.md`**)
 - **Handoff / new sessions:** **`agent-handoff.md`** — same resolution rules
-- **Per ticket:** `.github/Sprint {N}/{TICKET-ID}-{slug}/ticket.md` + `plan.md` + optional `research/`, `scripts/`
+- **Per ticket:** `.github/Sprint {N}/{TICKET-ID}-{slug}/ticket.md` + `plan.md` + optional `research/`, `scripts/`, and after CTX promotion `context/CTX-###-{slug}/` (archived handoff)
 - **Skills (slash commands):** `.claude/skills/{skill}/SKILL.md` — *after `/project-start` these are the copies in this repo; developing the plugin may use a marketplace path instead*
 
 ---
@@ -45,7 +45,7 @@ You **must** do this without the user having to ask:
 |----------|------------|-------------|------------|--------|
 | Bug      | `BUG-###`  | yes (stub+) | common     | |
 | Work order | `WO-###` | yes (stub+) | common     | |
-| Context  | `CTX-###`  | **no** until promoted | often | **Intake only**—promote with `/create-ticket promote CTX-###` or `/create-backlog` before `/research`, `/plan`, `/build`, `/vqa` |
+| Context  | `CTX-###`  | **no** until promoted | often | **Intake only**—promote with `/create-ticket promote CTX-###` or `/create-backlog` before `/research`, `/plan`, `/build`, `/vqa`. On promotion, full CTX folder archives under `{BUG|WO}-###/context/CTX-###-{slug}/` with a **References** link from the parent ticket. |
 
 - **Interactive intake:** **`create-ticket`** and **`/dev-handoff` → ClaudeOps** collect **ticket type** (and title) **before** the optional “additional notes for the engineer” prompt so the body follows **`bug_report.md`** / **`work_order.md`** / **`context.md`**.
 
@@ -86,7 +86,7 @@ You **must** do this without the user having to ask:
 
 - **GitHub:** `gh` CLI; Board mutations per `workflow.md` **Key Commands (GitHub)**
 - **Jira / Confluence:** Atlassian MCP (tool names in server descriptor)
-- **Figma (optional):** Figma MCP for canvas; map URL in `ticket.md` **References**
+- **Figma (optional):** Figma MCP for canvas; map URL in `ticket.md` **References**. **Build + VQA:** when a ticket references Figma nodes, **`skills/conventions/03-figma-design-truth.md`** — live MCP pull is authoritative; `research/` and `plan.md` are not the design spec.
 - **Other (project-specific):** *e.g. Datadog, Sentry, Linear*
 
 ---
@@ -105,7 +105,7 @@ You **must** do this without the user having to ask:
 
 ## Do not repeat (dead ends, incidents, or decisions)
 
-- *One line each—what went wrong and what we do instead.*
+- *UI build from plan/research alone when ticket has Figma refs — Opus ignored the spec. `/build` must write `research/figma-design-truth.md` from Figma MCP first; `/vqa` must compare fresh MCP vs code, not plan checkmarks.*
 
 ---
 
@@ -113,4 +113,6 @@ You **must** do this without the user having to ask:
 
 - *2026-04-29 — **`create-ticket`** (create mode): requires configured **`workflow.md`** Backend (no local-only scaffold); **remote issue first**, then local folder **`ticket.md`**. Aligns with **`create-backlog`** and **`01-plugin-root-and-templates.md`**.*
 - *2026-04-29 — Documented **`PLUGIN_ROOT`** / **`workflow.md`** resolution via **`skills/conventions/01-plugin-root-and-templates.md`**; removed reliance on machine-specific paths.*
+- *2026-06-01 — **Figma design truth:** `skills/conventions/03-figma-design-truth.md` — `/build` pulls Figma MCP before spawning agents and writes `research/figma-design-truth.md`; `code-build` must ground UI in that snapshot; `/vqa` compares fresh MCP vs implemented build (not research/plan).*
+- *2026-06-01 — **CTX promotion preserves handoff:** `/create-ticket promote` and `/create-backlog` archive CTX under `{BUG|WO}-###/context/CTX-###-{slug}/` with **References** + `context_capture:` on the parent ticket.*
 - *2026-04-30 — `/create-backlog` now: (1) bootstraps Backend + Triage mode inline via AskUserQuestion when `workflow.md` is missing/unconfigured, persisting to `memory.md` + `workflow.md`; (2) discovers CTX tickets from the remote backend (GitHub `gh issue list --label context`, Jira JQL `labels = "context"`) in addition to local `.github/Sprint */CTX-*/`; (3) supports a Remote-only triage mode (no local scaffold) via new `DELEGATED_REMOTE_ONLY` flag passed through `create-ticket promote`. Bootstrap does not run the full `/project-start` scaffold.*

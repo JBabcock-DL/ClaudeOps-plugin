@@ -20,15 +20,20 @@ Do not proceed until confirmed.
 Before planning anything, read these files in order:
 1. memory.md (if it exists in the repo root) — project running memory; skip if missing or empty
 2. workflow.md — resolve path per skills/conventions/01-plugin-root-and-templates.md
-3. $ARGUMENTS/ticket.md
-4. $ARGUMENTS/plan.md (if it exists — note whether it is a stub or already has steps)
-5. Any files in $ARGUMENTS/research/ if they exist
+3. **`skills/conventions/03-figma-design-truth.md`**
+4. $ARGUMENTS/ticket.md
+5. If `ticket.md` frontmatter has `context_capture:` or **References** links to `./context/CTX-*`, read that archived context `ticket.md` next — it holds the authoritative Figma design reference and full dev-handoff scaffold from `/dev-handoff` promotion.
+6. $ARGUMENTS/plan.md (if it exists — note whether it is a stub or already has steps)
+7. Any files in $ARGUMENTS/research/ if they exist
+8. Any files in $ARGUMENTS/context/*/research/ if the ticket was promoted from a CTX capture
 
 **CTX guard.** If the resolved ticket folder name matches `CTX-*`, stop immediately and tell the user: "Plans are only written against `bug` or `work-order` tickets. Promote this context ticket first with `/create-ticket promote {CTX-ID}` or run `/create-backlog`."
 
 Planning rules:
 - Do not start building anything — this is a planning step only
 - Plans must be grounded in the ticket's Requirements and Success Criteria
+- **When the ticket has a Figma surface** (per `03-figma-design-truth.md`): pull Figma MCP or read a fresh `figma-design-truth.md` before writing UI steps; cite `file_key` / `node_id` in **Dependencies & Tools**; first UI step for `code-build` must be "Read/refresh `research/figma-design-truth.md` from Figma MCP"
+- **Do not paraphrase visual specs in plan steps** — point build agents at the Figma node and design-truth snapshot
 - Each step must be concrete and executable by a build agent (no vague steps like "implement feature")
 - Identify which MCP servers, tools, or external systems will be needed and list them
 - Flag any missing information, ambiguous requirements, or blockers as open questions

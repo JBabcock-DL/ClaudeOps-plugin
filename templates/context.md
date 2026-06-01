@@ -16,7 +16,7 @@ CTX tickets are triaged before `/research`, `/plan`, or `/build`.
 
 Agents creating tickets from **structured design sources** (e.g. DesignOps `/dev-handoff`, Figma MCP output) should **populate the scaffold by default** — do not strip Requirements / Acceptance criteria when the user or workflow selected a design handoff.
 
-Promotion (`/create-ticket promote` or `/create-backlog`) still moves salient content into `bug_report.md` / `work_order.md` when CTX becomes BUG/WO.
+Promotion (`/create-ticket promote` or `/create-backlog`) moves salient content into `bug_report.md` / `work_order.md` when CTX becomes BUG/WO, and **archives the full original CTX folder** at `{BUG|WO}-###/context/CTX-###-{slug}/` with a **References** link from the promoted ticket — Figma file keys, node IDs, and handoff scaffolds stay intact.
 -->
 
 ## Source

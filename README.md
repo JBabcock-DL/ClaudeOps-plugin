@@ -131,6 +131,7 @@ When it finishes, your repo is fully wired — tickets you create will sync to t
                 │               ↓              │
                 │   /create-backlog triages    │
                 │   CTX-* → BUG-### or WO-###  │
+                │   (CTX archived under context/) │
                 └──────────────────────────────┘
                               ↓
 create-ticket (bug | wo) → research (optional) → plan → build → vqa
