@@ -55,8 +55,8 @@ memory.md                  # Short running memory to save agent context (see Con
 
 | Type | Label | Template | Naming | Lifecycle |
 |---|---|---|---|---|
-| Bug | `bug` | `bug_report.md` | `BUG-{N}-{slug}` | Full lifecycle (create → research → plan → build → vqa) |
-| Work Order | `work-order` | `work_order.md` | `WO-{N}-{slug}` | Full lifecycle (create → research → plan → build → vqa) |
+| Bug | `bug` | `bug_report.md` | `BUG-{N}-{slug}` | Full lifecycle (create → research → plan → build → review) |
+| Work Order | `work-order` | `work_order.md` | `WO-{N}-{slug}` | Full lifecycle (create → research → plan → build → review) |
 | Context | `context` | `context.md` | `CTX-{N}-{slug}` | Triage — raw dumps **or** design-handoff scaffold; must be promoted to `bug` or `work-order` before research / planning / building |
 
 Each type has its own sequential numbering (`BUG-001`, `BUG-002`, `WO-001`, `CTX-001`, etc.).
@@ -67,36 +67,37 @@ Context tickets are an intake format for **bulk raw information** — designer n
 
 **`context.md` ships two intake shapes:** (1) **Design handoff (default scaffold)** — Goal, Design reference, Requirements (functional / visual / technical), Acceptance criteria, Out of scope, and Notes for build agent — use this when dropping **Figma → engineering** work or running `/dev-handoff` so a build agent can scope a task **before** promotion. (2) **Raw dump** — lean on Source, Summary, Raw Notes, and Assets & Links; leave structured sections empty or `TBD` when no UI/code scope exists yet. Bug and work-order tickets still use **`bug_report.md`** / **`work_order.md`** for fully structured Requirements / Success Criteria **after** promotion.
 
-A context ticket stays in **Context Backlog** until it is **promoted** into the correct type:
+A context ticket stays in **Backlog** until it is **promoted** into the correct type:
 - `/create-ticket promote {CTX-ID}` — interactively promote a single CTX ticket into a `bug` or `work-order`
 - `/create-backlog` — bulk-triage every unpromoted CTX ticket in the current sprint, classifying each into a `bug` or `work-order` (with user confirmation per ticket)
 
 **On promotion**, the workflow creates a **new** `{BUG|WO}-###-{slug}/` folder, **moves** the original CTX folder into `{BUG|WO}-###/context/CTX-###-{slug}/` (verbatim — including Figma design reference, requirements, and any `research/`), writes a re-templated `ticket.md` on the parent with `promoted_from: CTX-###` and a **References** link to the archive, and relabels the remote issue in place. A sprint-root tombstone `CTX-###-PROMOTED.md` points at the archive for discovery.
 
-The `/research`, `/plan`, `/build`, and `/vqa` skills refuse to run on an un-promoted `CTX-*` ticket and will point the user at `/create-ticket promote` or `/create-backlog` first.
+The `/research`, `/plan`, `/build`, and `/review` skills refuse to run on an un-promoted `CTX-*` ticket and will point the user at `/create-ticket promote` or `/create-backlog` first.
 
 ---
 
 ## Ticket Lifecycle
 
 0. **Intake (optional)** — `/create-ticket ctx "..."` drops raw context into a CTX ticket without forcing structure. CTX tickets are triaged later via `/create-ticket promote {CTX-ID}` (single) or `/create-backlog` (batch), which converts each into a `bug` or `work-order` with the next sequential ID of that type.
-1. **Create ticket** — `/create-ticket` requires a configured **Ticket Backend** in `workflow.md`, creates the **remote** issue first (GitHub Issue + Project, or Jira), then writes the sprint folder, `ticket.md`, and stub `plan.md` (bug / work-order only), with board/status: **Context Backlog**
+1. **Create ticket** — `/create-ticket` requires a configured **Ticket Backend** in `workflow.md`, creates the **remote** issue first (GitHub Issue + Project, or Jira), then writes the sprint folder, `ticket.md`, and stub `plan.md` (bug / work-order only), with board/status: **Backlog**
 2. **Research** *(optional, recommended for unfamiliar work)* — `/research` investigates the problem domain and writes findings to `research/`; moves ticket to **In Research**
 3. **Plan** — `/plan` enters plan mode for interactive review, writes the approved plan to `plan.md` (including a `## Build Agents` section defining parallel phases), and moves ticket to **In Planning**
-4. **Build** — `/build` reads the `## Build Agents` section, moves ticket to **In Build**, and spawns build agents in parallel phases. When the ticket references Figma, `/build` pulls live design context via Figma MCP first (see **`skills/conventions/03-figma-design-truth.md`**) and writes `research/figma-design-truth.md` — **`plan.md` and `research/` are not the visual spec.** Individual build skills (`/code-build`, `/doc-build`, `/script-build`, `/api-build`, `/figma-build`) can be used directly for single-domain tickets.
-5. **Verify** — `/vqa` runs a Figma-first QA pass: fresh Figma MCP pull is the **Design** column truth; implemented code/DOM is the **Build** column truth — not research or plan prose. Requires **Figma VQA Checklist** with `file_key` + `node_id` or explicit N/A. Fills the assertion table 1:1, then Functional QA. Moves ticket to **In Review** → **Completed** when every assertion passes.
+4. **Build** — `/build` reads the `## Build Agents` section, moves ticket to **In Build**, and spawns build agents in parallel phases. When the ticket references Figma, `/build` pulls live design context via Figma MCP first (see **`skills/conventions/03-figma-design-truth.md`**) and writes `research/figma-design-truth.md` — **`plan.md` and `research/` are not the visual spec.** Individual build skills (`/code-build`, `/doc-build`, `/script-build`, `/api-build`, `/figma-build`) can be used directly for single-domain tickets. When all build steps are checked off, `/build` moves the ticket to **Ready for Review**.
+5. **Review** — `/review` moves the ticket to **In Review**, then runs a Figma-first QA pass: fresh Figma MCP pull is the **Design** column truth; implemented code/DOM is the **Build** column truth — not research or plan prose. Requires **Figma VQA Checklist** with `file_key` + `node_id` or explicit N/A. Fills the assertion table 1:1, then Functional QA. Moves ticket to **Completed** when every assertion passes, or back to **In Build** on failure.
 
 > Skip research for well-understood, mechanical tickets where requirements are unambiguous.
 
-The six workflow phases are:
+The seven workflow phases are:
 
 | Phase | Meaning |
 |---|---|
-| Context Backlog | Ticket created, not yet started |
+| Backlog | Ticket created, not yet started |
 | In Research | Discovery / investigation underway |
 | In Planning | plan.md being drafted or refined |
 | In Build | Build agents executing the plan |
-| In Review | VQA pass in progress |
+| Ready for Review | All build steps complete — waiting for the user to run `/review` |
+| In Review | Review pass in progress |
 | Completed | Verified, done |
 
 These phases are stored on each ticket:
@@ -121,10 +122,11 @@ These phases are stored on each ticket:
 
 | Status | Option ID |
 |---|---|
-| Context Backlog | `[CONFIGURE: option ID for Context Backlog status]` |
+| Backlog | `[CONFIGURE: option ID for Backlog status]` |
 | In Research | `[CONFIGURE: option ID for In Research status]` |
 | In Planning | `[CONFIGURE: option ID for In Planning status]` |
 | In Build | `[CONFIGURE: option ID for In Build status]` |
+| Ready for Review | `[CONFIGURE: option ID for Ready for Review status]` |
 | In Review | `[CONFIGURE: option ID for In Review status]` |
 | Completed | `[CONFIGURE: option ID for Completed status]` |
 
@@ -176,10 +178,11 @@ Phases are tracked as **labels** on each Jira issue (not Status), so no workflow
 
 | Phase | Label |
 |---|---|
-| Context Backlog | `phase:context-backlog` |
+| Backlog | `phase:backlog` |
 | In Research | `phase:in-research` |
 | In Planning | `phase:in-planning` |
 | In Build | `phase:in-build` |
+| Ready for Review | `phase:ready-for-review` |
 | In Review | `phase:in-review` |
 | Completed | `phase:completed` |
 
@@ -191,12 +194,13 @@ In addition, every ticket created by this workflow gets a `claude-ops` label for
 
 | Phase | Jira transition name |
 |---|---|
-| `phase:context-backlog` | `[CONFIGURE: transition name | skip]` |
-| `phase:in-research`     | `[CONFIGURE: transition name | skip]` |
-| `phase:in-planning`     | `[CONFIGURE: transition name | skip]` |
-| `phase:in-build`        | `[CONFIGURE: transition name | skip]` |
-| `phase:in-review`       | `[CONFIGURE: transition name | skip]` |
-| `phase:completed`       | `[CONFIGURE: transition name | skip]` |
+| `phase:backlog`           | `[CONFIGURE: transition name | skip]` |
+| `phase:in-research`       | `[CONFIGURE: transition name | skip]` |
+| `phase:in-planning`       | `[CONFIGURE: transition name | skip]` |
+| `phase:in-build`          | `[CONFIGURE: transition name | skip]` |
+| `phase:ready-for-review`  | `[CONFIGURE: transition name | skip]` |
+| `phase:in-review`         | `[CONFIGURE: transition name | skip]` |
+| `phase:completed`         | `[CONFIGURE: transition name | skip]` |
 
 Resolution at runtime: agents call `getTransitionsForJiraIssue` on the target issue to resolve the transition `id` matching the configured `name` (case-insensitive), then call `transitionJiraIssue` with that `id`. If the name is not currently available (Jira workflow guards based on current Status) or the value is `skip`, the agent skips the transition and continues — the label swap is authoritative.
 
@@ -274,7 +278,7 @@ Use when a work order involves:
 - `CLAUDE.md` at the repository root (from `/project-start`) must keep its **Agent rules** so Claude reads and updates `memory.md` without the user asking. **`memory.md`** holds short, project-wide facts; update it when something stable and reusable changes. Do not use either file to replace `ticket.md` or `plan.md` for a specific ticket
 - Ticket IDs are sequential per type (`BUG-001`, `BUG-002`, `WO-001`, `WO-002`, `CTX-001`, `CTX-002`) and are always prefixed onto the remote issue title
 - When a `CTX-###` ticket is promoted, a **new** `{BUG|WO}-###-{slug}/` folder is created, the original CTX folder is **archived** at `{BUG|WO}-###/context/CTX-###-{slug}/` (full Figma handoff preserved), the parent `ticket.md` is re-templated with `promoted_from: CTX-###` and `context_capture:` pointing at the archive, and the remote issue is relabeled / retyped in place. A sprint-root `CTX-###-PROMOTED.md` tombstone aids discovery.
-- **Figma-backed UI tickets:** follow **`skills/conventions/03-figma-design-truth.md`** at `/build`, `/code-build`, `/plan`, and `/vqa` — live Figma MCP over `plan.md` / `research/`.
+- **Figma-backed UI tickets:** follow **`skills/conventions/03-figma-design-truth.md`** at `/build`, `/code-build`, `/plan`, and `/review` — live Figma MCP over `plan.md` / `research/`.
 - Sprint folders are named `Sprint {N}` — do not use dates
 - All `ticket.md` files include frontmatter fields for the remote issue:
   - **GitHub backend**: `github_issue` (issue number) and `project_item_id` (PVTI_…)

@@ -1,6 +1,6 @@
 # Figma design truth (build + VQA)
 
-Every skill that **implements** or **verifies** UI work (`/build`, `/code-build`, `/figma-build`, `/plan`, `/vqa`) must treat the **live Figma file** as the authoritative design spec when the ticket references a Figma node or file.
+Every skill that **implements** or **verifies** UI work (`/build`, `/code-build`, `/figma-build`, `/plan`, `/review`) must treat the **live Figma file** as the authoritative design spec when the ticket references a Figma node or file.
 
 **`research/` and `plan.md` are supporting context only** — never the source of truth for layout, typography, color tokens, copy, component variants, or spacing. If research/plan contradict Figma, **Figma wins**.
 
@@ -38,7 +38,7 @@ If a ticket has a Figma surface but `file_key` or `node_id` cannot be resolved, 
 
 ## Figma MCP pull (design truth snapshot)
 
-Before writing or changing UI code, and again at `/vqa`, pull fresh data from the Figma MCP server available in the runtime. Browse MCP tool descriptors first; common tool names:
+Before writing or changing UI code, and again at `/review`, pull fresh data from the Figma MCP server available in the runtime. Browse MCP tool descriptors first; common tool names:
 
 | Purpose | Typical tool name |
 | --- | --- |
@@ -80,7 +80,7 @@ Pulled via Figma MCP at build time. **Authoritative over plan.md and research/*.
 <!-- Relative path: research/figma-design-truth.png -->
 ```
 
-Save the screenshot as **`research/figma-design-truth.png`** (build) or refresh **`research/figma-source.png`** (VQA per `/vqa` skill).
+Save the screenshot as **`research/figma-design-truth.png`** (build) or refresh **`research/figma-source.png`** (review per `/review` skill).
 
 **Do not skip the MCP pull** because `research/` or `plan.md` already describe the UI. Those may be incomplete or stale.
 
@@ -125,9 +125,9 @@ Non-UI steps (API, infra, pure logic) may skip the MCP pull.
 
 ---
 
-## `/vqa` obligations
+## `/review` obligations
 
-1. **Re-pull Figma MCP at VQA time** — do not reuse `figma-design-truth.md` from build as the comparison baseline without confirming the file still matches (prefer fresh `get_design_context` + `get_variable_defs`).
+1. **Re-pull Figma MCP at review time** — do not reuse `figma-design-truth.md` from build as the comparison baseline without confirming the file still matches (prefer fresh `get_design_context` + `get_variable_defs`).
 2. Fill assertion table **Design (Figma)** columns from the **fresh MCP pull**, not from research or plan.
 3. Fill **Build (implemented)** from actual source files / rendered DOM — not from what plan.md claims was built.
 4. Any row where research/plan disagrees with Figma: mark using **Figma** as Design column truth; if build matches research but not Figma, result is **FAIL**.

@@ -97,6 +97,10 @@ Execution steps (in order):
 
 4. Wait for all agents in the phase to complete before launching the next phase.
 
-5. After all phases complete, read plan.md and verify all steps are checked off. Report any unchecked steps as blockers.
+5. After all phases complete, read plan.md and verify all steps are checked off. Report any unchecked steps as blockers. If any steps remain unchecked, do **not** advance the ticket phase — stop and report back.
 
-6. Report back: which agents ran, which phases completed, any failures or unchecked steps, any PR URLs opened by agents (if `branch-per-agent`) or the list of uncommitted file paths (if `main`), path to **`research/figma-design-truth.md`** when Figma applied, and confirm the ticket is ready for `/vqa`.
+6. When all build steps are checked off, move the ticket to **Ready for Review**, using the method determined by the **Backend:** field in `workflow.md`:
+   - **GitHub backend:** GraphQL `updateProjectV2ItemFieldValue` mutation from the **Key Commands (GitHub)** block, using the `project_item_id` from ticket.md frontmatter and the Ready for Review option ID from workflow.md.
+   - **Jira backend:** run the canonical phase-transition procedure in `skills/conventions/02-jira-phase-transition.md` with `TARGET_PHASE = phase:ready-for-review`.
+
+7. Report back: which agents ran, which phases completed, any failures or unchecked steps, any PR URLs opened by agents (if `branch-per-agent`) or the list of uncommitted file paths (if `main`), path to **`research/figma-design-truth.md`** when Figma applied, confirmation the ticket is in **Ready for Review**, and remind the user to run `/review` when they are ready to verify.

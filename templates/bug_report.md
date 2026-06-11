@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Defect intake with reproduction, verification, design linkage, and stage hints for `/research`, `/plan`, `/build`, `/vqa`
+about: Defect intake with reproduction, verification, design linkage, and stage hints for `/research`, `/plan`, `/build`, `/review`
 labels: bug
 ---
 
@@ -110,13 +110,13 @@ Optional: related analytics or support-volume note.
 ## Figma VQA Checklist
 
 <!--
-For visual/UI bugs, `/vqa` populates and evaluates this section AUTOMATICALLY against the Figma node referenced in **Design reference** above. The post-fix build must match the design ~1:1. Same structure as the work-order template — the agent fills both columns and marks PASS / FAIL / N/A.
+For visual/UI bugs, `/review` populates and evaluates this section AUTOMATICALLY against the Figma node referenced in **Design reference** above. The post-fix build must match the design ~1:1. Same structure as the work-order template — the agent fills both columns and marks PASS / FAIL / N/A.
 
 If this is a non-visual bug (API / logic / infra), replace the section body with:
 **N/A — non-visual bug; functional QA only.**
 -->
 
-**Figma source (must be filled before `/vqa` runs):**
+**Figma source (must be filled before `/review` runs):**
 
 | Field | Value |
 | --- | --- |

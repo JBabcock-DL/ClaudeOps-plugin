@@ -125,11 +125,11 @@ Ticket: .github/Sprint {N}/{TICKET-ID}-{slug}/ticket.md
 Output: .github/Sprint {N}/{TICKET-ID}-{slug}/research/{topic}.md
 ```
 
-### Review / VQA Agent
+### Review Agent
 ```
-ROLE: Review / VQA
+ROLE: Review
 
-Verify completed work against the Success Criteria and Testing & VQA sections in the ticket below. Write a vqa-report.md in the research/ subfolder. Move to Completed if all pass, or back to In Build with a comment on the remote issue (GitHub issue comment or Jira issue comment via the Atlassian MCP) if anything fails.
+Verify completed work against the Success Criteria and Testing & VQA sections in the ticket below. Move to In Review when starting (GitHub: Status field → In Review; Jira: replace the `phase:*` label with `phase:in-review`). Write a vqa-report.md in the research/ subfolder. Move to Completed if all pass, or back to In Build with a comment on the remote issue (GitHub issue comment or Jira issue comment via the Atlassian MCP) if anything fails.
 
 Ticket: .github/Sprint {N}/{TICKET-ID}-{slug}/ticket.md
 Output: .github/Sprint {N}/{TICKET-ID}-{slug}/research/vqa-report.md

@@ -87,7 +87,7 @@ Then, depending on the backend you chose:
 ### GitHub branch
 4. Create GitHub labels (`bug`, `work-order`) via `gh`
 5. Create a GitHub Project board named after your project
-6. Configure the board's Status field with the 6 workflow columns (Context Backlog → In Research → In Planning → In Build → In Review → Completed)
+6. Configure the board's Status field with the 7 workflow columns (Backlog → In Research → In Planning → In Build → Ready for Review → In Review → Completed)
 7. Write all project IDs (board ID, field ID, status option IDs) into `.github/templates/workflow.md`
 
 ### Jira branch
@@ -96,7 +96,7 @@ Then, depending on the backend you chose:
 6. Fetch that project’s issue types from Jira (e.g. Atlassian MCP `getJiraProjectIssueTypesMetadata`), then ask which fetched types map to our `bug`, `work-order`, and `context` ticket types — options are only names returned by that fetch, so downstream creates do not fail on wrong issue types
 7. Write the cloud ID, site URL, project key, project name, and issue-type mappings into `.github/templates/workflow.md`
 
-Workflow phases (Context Backlog → In Research → In Planning → In Build → In Review → Completed) are tracked as `phase:*` labels on each Jira issue — no Jira workflow / admin changes required.
+Workflow phases (Backlog → In Research → In Planning → In Build → Ready for Review → In Review → Completed) are tracked as `phase:*` labels on each Jira issue — no Jira workflow / admin changes required.
 
 When it finishes, your repo is fully wired — tickets you create will sync to the chosen backend automatically.
 
@@ -118,7 +118,7 @@ When it finishes, your repo is fully wired — tickets you create will sync to t
 | `script-build` | `/script-build` | Writes automation or shell scripts |
 | `api-build` | `/api-build` | Builds API integrations or Claude API-powered features |
 | `figma-build` | `/figma-build` | Executes Figma canvas work |
-| `vqa` | `/vqa` | Runs a visual and functional QA pass on a completed ticket |
+| `review` | `/review` | Runs a visual and functional QA pass on a completed ticket |
 
 ---
 
@@ -134,7 +134,7 @@ When it finishes, your repo is fully wired — tickets you create will sync to t
                 │   (CTX archived under context/) │
                 └──────────────────────────────┘
                               ↓
-create-ticket (bug | wo) → research (optional) → plan → build → vqa
+create-ticket (bug | wo) → research (optional) → plan → build → review
 ```
 
 Each ticket lives in `.github/Sprint {N}/{TICKET-ID}-{slug}/` with a `ticket.md`, `plan.md`, and optional `research/` and `scripts/` folders. All tickets are linked to a remote issue — a GitHub Issue tracked on the Project board, or a Jira issue labeled with a `phase:*` label and `claude-ops`.

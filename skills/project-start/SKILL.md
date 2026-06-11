@@ -49,7 +49,7 @@ Then scaffold the following in the current working directory:
    - .claude/skills/api-build/
    - .claude/skills/figma-build/
    - .claude/skills/project-start/
-   - .claude/skills/vqa/
+   - .claude/skills/review/
 
 2. Copy all template files from **`{PLUGIN_ROOT}/templates/`** into the new project's **`.github/templates/`** — the full set is `workflow.md`, `bug_report.md`, `work_order.md`, `context.md`, and `agent-handoff.md`. Confirm all five files land in the new repo. (**`PLUGIN_ROOT`** — **`skills/conventions/01-plugin-root-and-templates.md`**.)
 
@@ -89,7 +89,7 @@ Then scaffold the following in the current working directory:
 
    1. If `memory.md` exists in this repository root, read it at the start of any ticket- or workflow-related work, then resolve and read **`workflow.md`** per **`skills/conventions/01-plugin-root-and-templates.md`** for the full spec.
    2. Update `memory.md` when you establish or change something durable: backend facts, default git strategy, team conventions, MCP/tool setup, or recurring mistakes to avoid. Keep entries short. Never replace per-ticket `plan.md` or `ticket.md` with `memory.md`.
-   3. Workflow skills are in `.claude/skills/`. Use the slash commands from your README (e.g. `create-ticket`, `create-backlog`, `research`, `plan`, `build`, `vqa`).
+   3. Workflow skills are in `.claude/skills/`. Use the slash commands from your README (e.g. `create-ticket`, `create-backlog`, `research`, `plan`, `build`, `review`).
 
    ## Where to look
 
@@ -121,7 +121,7 @@ Using the `gh` CLI:
 5a-A. **Set up custom status columns** on the new project board — the default GitHub Project board has generic options (Todo, In Progress, Done) that do NOT match our workflow. You must replace them with the correct statuses using the GitHub GraphQL API:
 
    - Run `gh project field-list <PROJECT_NUMBER> --owner <OWNER_LOGIN> --format json` to get the Status field's node ID (`PVTSSF_...`). The Status field has `"type": "ProjectV2SingleSelectField"`.
-   - Call `gh api graphql` with the `updateProjectV2Field` mutation to replace all options with the 6 workflow statuses. Use this exact shape:
+   - Call `gh api graphql` with the `updateProjectV2Field` mutation to replace all options with the 7 workflow statuses. Use this exact shape:
 
    ```
    gh api graphql -f query='
@@ -129,12 +129,13 @@ Using the `gh` CLI:
      updateProjectV2Field(input: {
        fieldId: "<STATUS_FIELD_ID>"
        singleSelectOptions: [
-         { name: "Context Backlog", color: BLUE,   description: "" }
-         { name: "In Research",     color: PURPLE, description: "" }
-         { name: "In Planning",     color: YELLOW, description: "" }
-         { name: "In Build",        color: ORANGE, description: "" }
-         { name: "In Review", color: RED,    description: "" }
-         { name: "Completed",       color: GREEN,  description: "" }
+         { name: "Backlog",           color: BLUE,   description: "" }
+         { name: "In Research",       color: PURPLE, description: "" }
+         { name: "In Planning",       color: YELLOW, description: "" }
+         { name: "In Build",          color: ORANGE, description: "" }
+         { name: "Ready for Review",  color: PINK,   description: "" }
+         { name: "In Review",         color: RED,    description: "" }
+         { name: "Completed",         color: GREEN,  description: "" }
        ]
      }) {
        projectV2Field {
@@ -167,14 +168,14 @@ All Jira work goes through the **Atlassian MCP server** in Claude Code. Before d
   5. Record the answers as `bugIssueType`, `workOrderIssueType`, and `contextIssueType` — each value must be **verbatim** one of the fetched names.
 
 - **Labels are authoritative.** Workflow phases are tracked via labels on each issue:
-  - `phase:context-backlog`, `phase:in-research`, `phase:in-planning`, `phase:in-build`, `phase:in-review`, `phase:completed`
+  - `phase:backlog`, `phase:in-research`, `phase:in-planning`, `phase:in-build`, `phase:ready-for-review`, `phase:in-review`, `phase:completed`
   - Every ticket also gets a `claude-ops` label plus exactly one of `bug`, `work-order`, or `context`
   No pre-creation of labels is required — Jira creates labels on first use.
 
 - **Phase → Transition map (optional, for visible board movement).** Jira boards grouped by Status will not visibly move when only labels change. To make cards physically move on the default Status-grouped Kanban view, capture an optional mapping from each `phase:*` to a Jira workflow transition.
   1. Pick any existing issue in the project (or create a throwaway one) and call **`getTransitionsForJiraIssue`** with `cloudId` and that `issueIdOrKey`. Record the available `transitions[].name` values as **`availableTransitionNames`** (case-preserved as Jira returns them).
-  2. If the list is empty, skip mapping entirely — record all six phases as `skip` and inform the user the project's workflow exposes no transitions to this account.
-  3. Otherwise run **AskUserQuestion** once per phase (or one bundled multi-question), each with options drawn **only** from **`availableTransitionNames`** plus a literal `skip` option. Wording: "Which Jira transition should fire when a ticket enters **`phase:<name>`**?" Capture the answers as `transition_context_backlog`, `transition_in_research`, `transition_in_planning`, `transition_in_build`, `transition_in_review`, `transition_completed`. A value of `skip` means: do not call `transitionJiraIssue` for that phase; the label swap is sufficient.
+  2. If the list is empty, skip mapping entirely — record all seven phases as `skip` and inform the user the project's workflow exposes no transitions to this account.
+  3. Otherwise run **AskUserQuestion** once per phase (or one bundled multi-question), each with options drawn **only** from **`availableTransitionNames`** plus a literal `skip` option. Wording: "Which Jira transition should fire when a ticket enters **`phase:<name>`**?" Capture the answers as `transition_backlog`, `transition_in_research`, `transition_in_planning`, `transition_in_build`, `transition_ready_for_review`, `transition_in_review`, `transition_completed`. A value of `skip` means: do not call `transitionJiraIssue` for that phase; the label swap is sufficient.
   4. Persist this mapping in `workflow.md` (step 6 · Option B writes it under **Ticket Tracker — Jira → Phase → Transition map**).
 
 - **Do not create GitHub labels or a GitHub Project** on this branch. Skip step 5a-A entirely.
@@ -195,7 +196,7 @@ Then execute **only** the sub-branch matching `BACKEND`.
 
 - Run `gh repo view --json owner,nameWithOwner` from the **new repo root** and record `owner.login` and `nameWithOwner` for the **Key Commands** section.
 - Run `gh project view <PROJECT_NUMBER> --owner <OWNER_LOGIN> --format json` and read `title`, `id` (Project node id), and `number`.
-- Use the Status field ID and the 6 option IDs captured from the mutation in step 5a-A — do not run field-list again.
+- Use the Status field ID and the 7 option IDs captured from the mutation in step 5a-A — do not run field-list again.
 - Open `.github/templates/workflow.md` and **edit the file**: replace every `[CONFIGURE: ...]` placeholder under **## Ticket Tracker — GitHub** and inside its **Key Commands (GitHub)** `bash` block with the real values (project title, `PVT_…` project id, owner, status field id, each status option id, project number, full `owner/repo`). Use the exact string values returned by `gh`; do not invent IDs.
 - Replace the entire **## Ticket Tracker — Jira** section body with:
 
@@ -216,12 +217,13 @@ Then execute **only** the sub-branch matching `BACKEND`.
   - `Issue type — Work Order` → captured `workOrderIssueType`
   - `Issue type — Context` → captured `contextIssueType`
   - **Phase → Transition map** rows — write the captured transition values verbatim (or the literal string `skip`):
-    - `phase:context-backlog` → `transition_context_backlog`
-    - `phase:in-research`     → `transition_in_research`
-    - `phase:in-planning`     → `transition_in_planning`
-    - `phase:in-build`        → `transition_in_build`
-    - `phase:in-review`       → `transition_in_review`
-    - `phase:completed`       → `transition_completed`
+    - `phase:backlog`          → `transition_backlog`
+    - `phase:in-research`      → `transition_in_research`
+    - `phase:in-planning`      → `transition_in_planning`
+    - `phase:in-build`         → `transition_in_build`
+    - `phase:ready-for-review` → `transition_ready_for_review`
+    - `phase:in-review`        → `transition_in_review`
+    - `phase:completed`        → `transition_completed`
   - The JQL example at the bottom of the section: replace `[CONFIGURE: PROJ]` with the captured `projectKey`.
 - Replace the entire **## Ticket Tracker — GitHub** section body (everything from the first bullet through the end of the **Key Commands (GitHub)** code block) with:
 
@@ -278,5 +280,5 @@ Wait for it to complete. All three tickets must appear in `.github/Sprint 1/` wi
     1. Open the project on GitHub
     2. Click **+ New view** (tab row at the top)
     3. Select **Board**
-    The 6 status columns will appear automatically since the Status field is already configured.
-- **Jira backend:** If the user wants a kanban view grouped by workflow phase, have them create a board in Jira with swimlanes or columns grouped by **Label**, showing the six `phase:*` labels in order: `phase:context-backlog`, `phase:in-research`, `phase:in-planning`, `phase:in-build`, `phase:in-review`, `phase:completed`. A JQL filter of `project = <KEY> AND labels = "claude-ops"` scopes the board to this workflow's tickets.
+    The 7 status columns will appear automatically since the Status field is already configured.
+- **Jira backend:** If the user wants a kanban view grouped by workflow phase, have them create a board in Jira with swimlanes or columns grouped by **Label**, showing the seven `phase:*` labels in order: `phase:backlog`, `phase:in-research`, `phase:in-planning`, `phase:in-build`, `phase:ready-for-review`, `phase:in-review`, `phase:completed`. A JQL filter of `project = <KEY> AND labels = "claude-ops"` scopes the board to this workflow's tickets.

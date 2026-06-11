@@ -1,12 +1,12 @@
 ---
-name: vqa
+name: review
 description: Run a visual and functional QA pass on a completed ticket. Use when work is done and needs verification against success criteria before closing.
 argument-hint: "[Sprint N/TICKET-ID-slug]"
 context: fork
 agent: general-purpose
 ---
 
-You are a Review and VQA Agent for the claude-ops project.
+You are a Review Agent for the claude-ops project.
 
 Ticket path: $ARGUMENTS
 
@@ -28,13 +28,19 @@ Before reviewing anything, read these files in order:
 7. Any files in $ARGUMENTS/research/ if they exist — **do not use research prose as Design (Figma) column values**
 8. Any files in $ARGUMENTS/context/*/research/ if the ticket was promoted from a CTX capture
 
-**CTX guard.** If the resolved ticket folder name matches `CTX-*`, stop immediately and tell the user: "VQA cannot run on a context ticket — there is no plan or Success Criteria to verify against. Promote it first with `/create-ticket promote {CTX-ID}` or run `/create-backlog`."
+**CTX guard.** If the resolved ticket folder name matches `CTX-*`, stop immediately and tell the user: "Review cannot run on a context ticket — there is no plan or Success Criteria to verify against. Promote it first with `/create-ticket promote {CTX-ID}` or run `/create-backlog`."
+
+## Step 0 — Move ticket to In Review
+
+Move the ticket to **In Review** before starting the review pass, using the method determined by the **Backend:** field in `workflow.md`:
+- **GitHub backend:** GraphQL `updateProjectV2ItemFieldValue` mutation from the **Key Commands (GitHub)** block, using the `project_item_id` from ticket.md frontmatter and the In Review option ID from workflow.md.
+- **Jira backend:** run the canonical phase-transition procedure in `skills/conventions/02-jira-phase-transition.md` with `TARGET_PHASE = phase:in-review`. Run unconditionally — the ticket may still be in **Ready for Review** from `/build`.
 
 ---
 
 ## Step 1 — Resolve the Figma source (mandatory unless explicitly N/A)
 
-Every `/vqa` run is **Figma-first**. Read the **Figma VQA Checklist** section in `ticket.md`. There are exactly two acceptable states:
+Every `/review` run is **Figma-first**. Read the **Figma VQA Checklist** section in `ticket.md`. There are exactly two acceptable states:
 
 - **A) Figma source filled** — `file_key`, `node_id`, and a Figma deep link are present. Continue at Step 2.
 - **B) Section body is exactly `**N/A — no Figma artifact (backend / API / infra ticket).**`** (or the bug-template equivalent). Skip Steps 2–4 and jump to **Step 5 — Functional QA only**.
@@ -47,7 +53,7 @@ If the user gives you a Figma URL during this step, parse it, write the parsed v
 
 ## Step 2 — Pull design context from Figma (fresh — authoritative baseline)
 
-**This pull is the Design (Figma) column truth.** Do not copy assertion values from `research/*.md`, `plan.md`, or ticket Requirements prose — even if they exist. Re-fetch from Figma even when `research/figma-design-truth.md` from build is present (build snapshot is context only; VQA compares against **current** Figma).
+**This pull is the Design (Figma) column truth.** Do not copy assertion values from `research/*.md`, `plan.md`, or ticket Requirements prose — even if they exist. Re-fetch from Figma even when `research/figma-design-truth.md` from build is present (build snapshot is context only; review compares against **current** Figma).
 
 Using the Figma MCP, in this order:
 

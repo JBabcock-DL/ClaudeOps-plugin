@@ -1,6 +1,6 @@
 # Jira phase transition — canonical procedure
 
-Every workflow skill that advances a ticket between phases (`/research`, `/plan`, `/build`, `/code-build`, `/api-build`, `/doc-build`, `/figma-build`, `/script-build`, `/vqa`, `/create-ticket`) must follow this exact procedure on the **Jira backend**. The label swap is the authoritative phase signal — **never** skip it, even when the IDE shows the ticket already moved or the agent assumes a previous step did it.
+Every workflow skill that advances a ticket between phases (`/research`, `/plan`, `/build`, `/code-build`, `/api-build`, `/doc-build`, `/figma-build`, `/script-build`, `/review`, `/create-ticket`) must follow this exact procedure on the **Jira backend**. The label swap is the authoritative phase signal — **never** skip it, even when the IDE shows the ticket already moved or the agent assumes a previous step did it.
 
 > **Why this file exists:** in earlier sessions, only `/research` reliably updated the Jira card. Downstream skills called `editJiraIssue` with just the new `phase:*` label, which **replaced** the entire labels array on the issue and silently wiped `claude-ops`, the type label (`bug` / `work-order`), and any others. The canonical procedure below prevents that by always reading the existing labels first and writing the **full** new set.
 
@@ -47,9 +47,11 @@ Steps:
 | `/research` | `phase:in-research` |
 | `/plan` | `phase:in-planning` |
 | `/build` (orchestrator, before spawning subagents) | `phase:in-build` |
+| `/build` (orchestrator, after all steps checked off) | `phase:ready-for-review` |
 | `/code-build`, `/api-build`, `/doc-build`, `/figma-build`, `/script-build` (when invoked **directly**, not via `/build`) | `phase:in-build` |
-| `/vqa` (all pass) | `phase:completed` |
-| `/vqa` (any fail) | `phase:in-build` |
-| `/create-ticket` (create mode) | `phase:context-backlog` (set on `createJiraIssue`; no swap needed — but Status transition step 5 still applies) |
+| `/review` (at start) | `phase:in-review` |
+| `/review` (all pass) | `phase:completed` |
+| `/review` (any fail) | `phase:in-build` |
+| `/create-ticket` (create mode) | `phase:backlog` (set on `createJiraIssue`; no swap needed — but Status transition step 5 still applies) |
 
 When `/build` is the orchestrator, **only the orchestrator** runs the procedure. Build subagents spawned by `/build` are explicitly told **not** to touch the remote issue. When a build skill is invoked directly (no orchestrator), that skill runs the procedure itself.

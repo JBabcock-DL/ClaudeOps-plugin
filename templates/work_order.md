@@ -1,12 +1,12 @@
 ---
 name: Work Order
-about: Agile ticket for features, enhancements, or design-system work — structured so research, planning, build, and VQA agents can run without tribal knowledge
+about: Agile ticket for features, enhancements, or design-system work — structured so research, planning, build, and review agents can run without tribal knowledge
 labels: work-order
 ---
 
 <!--
 WO tickets use the full scaffold below when created via `/create-ticket`, `/doc-handoff`-style enrichment, or human authoring.
-Stages: 🔍 Research → 📋 Planning → 🛠️ Build → ✅ VQA — each section tells agents what to produce or validate at that gate.
+Stages: 🔍 Research → 📋 Planning → 🛠️ Build → ✅ Review — each section tells agents what to produce or validate at that gate.
 -->
 
 ## Goal
@@ -125,13 +125,13 @@ Stack anchors: routes, services, repos, queues, schemas, env flags. Code Connect
 ## Figma VQA Checklist
 
 <!--
-`/vqa` populates and evaluates this section AUTOMATICALLY against the Figma node referenced above. The build must match the design ~1:1. The agent fills `Captured` columns by reading Figma via the Figma MCP (get_design_context, get_variable_defs, get_screenshot) and then compares against the implemented build (rendered DOM, CSS, screenshot). Each row must end up PASS / FAIL / N/A — no blank rows on a completed ticket.
+`/review` populates and evaluates this section AUTOMATICALLY against the Figma node referenced above. The build must match the design ~1:1. The agent fills `Captured` columns by reading Figma via the Figma MCP (get_design_context, get_variable_defs, get_screenshot) and then compares against the implemented build (rendered DOM, CSS, screenshot). Each row must end up PASS / FAIL / N/A — no blank rows on a completed ticket.
 
 If this ticket has no UI surface, replace the entire section body with:
 **N/A — no Figma artifact (backend / API / infra ticket).**
 -->
 
-**Figma source (must be filled before `/vqa` runs):**
+**Figma source (must be filled before `/review` runs):**
 
 | Field | Value |
 | --- | --- |
@@ -139,7 +139,7 @@ If this ticket has no UI surface, replace the entire section body with:
 | `node_id` | `<!-- e.g. 123:456 -->` |
 | Figma deep link | `<!-- https://www.figma.com/design/<fileKey>/...?node-id=<nodeId> --> ` |
 | Frame / scope | `<!-- e.g. Checkout — payment methods -->` |
-| Captured at | `<!-- ISO date the screenshot/design_context was pulled by /vqa -->` |
+| Captured at | `<!-- ISO date the screenshot/design_context was pulled by /review -->` |
 
 **Assertions** *(agent fills `Design (Figma)` and `Build (implemented)` columns, then marks Result):*
 
@@ -176,7 +176,7 @@ If this ticket has no UI surface, replace the entire section body with:
 
 **Per-row deviations:**
 
-<!-- For every FAIL row, drop a one-line note here: "Row 7 — design 16/24, build 14/20: regenerate from `--text-body-md` token". `/vqa` writes these. -->
+<!-- For every FAIL row, drop a one-line note here: "Row 7 — design 16/24, build 14/20: regenerate from `--text-body-md` token". `/review` writes these. -->
 
 -
 

@@ -1,7 +1,7 @@
 ---
 name: new-agent
 description: Spin up a new agent on an existing project by collecting context, orienting the agent via the handoff doc, then invoking the right skills to ramp up work. Use when starting a fresh Claude session on a ticket or kicking off new work.
-argument-hint: "[sprint number] [ticket-id or 'new'] [role: ticket|triage|research|plan|build|vqa]"
+argument-hint: "[sprint number] [ticket-id or 'new'] [role: ticket|triage|research|plan|build|review]"
 context: fork
 agent: general-purpose
 ---
@@ -20,7 +20,7 @@ Before doing anything else, read (Claude: do not require the user to say “read
 
 ## Step 1 — Collect missing context
 
-Parse $ARGUMENTS for: sprint number, ticket ID (or "new"), and role (ticket | triage | research | plan | build | vqa).
+Parse $ARGUMENTS for: sprint number, ticket ID (or "new"), and role (ticket | triage | research | plan | build | review).
 
 For any value not provided in $ARGUMENTS, ask the user using AskUserQuestion. Collect all missing values before proceeding — do not assume defaults.
 
@@ -30,11 +30,11 @@ Questions to ask if missing:
 - **Ticket** — "Do you have an existing ticket ID (e.g. WO-001, BUG-002), or should I create a new one? If new, what type (bug or work order) and what is the title?"
 - **Role** — "What should this agent do?
     1. Create a ticket
-    2. Triage the context backlog (bulk-classify CTX-* tickets)
+    2. Triage the backlog (bulk-classify CTX-* tickets)
     3. Research
     4. Plan
     5. Build
-    6. Verify (VQA)"
+    6. Review"
 
 Do not proceed to Step 2 until you have all three values confirmed.
 
@@ -60,13 +60,13 @@ Based on the confirmed role, invoke the corresponding skill using the Skill tool
 | research | `research` | ticket path |
 | plan | `plan` | ticket path |
 | build | `build` | ticket path |
-| vqa | `vqa` | ticket path |
+| review | `review` | ticket path |
 
-If the role is **ticket** and a ticket ID was already provided (ticket exists), skip create-ticket and ask the user what they want to do next — offer research, plan, build, or vqa.
+If the role is **ticket** and a ticket ID was already provided (ticket exists), skip create-ticket and ask the user what they want to do next — offer research, plan, build, or review.
 
 If the role is **build** and no `plan.md` exists or it is a stub, warn the user that a plan is required before building and offer to run `/plan` first.
 
-If the provided ticket ID starts with `CTX-` and the role is `research`, `plan`, `build`, or `vqa`, stop and tell the user that context tickets must be promoted first — offer to run `/create-ticket promote {CTX-ID}` or `/create-backlog` instead.
+If the provided ticket ID starts with `CTX-` and the role is `research`, `plan`, `build`, or `review`, stop and tell the user that context tickets must be promoted first — offer to run `/create-ticket promote {CTX-ID}` or `/create-backlog` instead.
 
 Wait for the invoked skill to complete before reporting back.
 

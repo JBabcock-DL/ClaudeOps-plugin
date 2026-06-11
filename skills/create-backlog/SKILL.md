@@ -51,7 +51,7 @@ Branch on the chosen backend:
 AskUserQuestion: "How should triage operate?"
 
 1. **Remote-only** — read/write tickets via `gh` / Atlassian MCP only; no local sprint folders or `ticket.md` files
-2. **Mirror locally** — scaffold `.github/Sprint {N}/` and write a local `ticket.md` for each CTX so `/research`, `/plan`, `/build`, `/vqa` can run
+2. **Mirror locally** — scaffold `.github/Sprint {N}/` and write a local `ticket.md` for each CTX so `/research`, `/plan`, `/build`, `/review` can run
 3. **Hybrid** — remote-only for now, decide per-ticket at promotion time
 
 ### 1d — Persist
@@ -153,7 +153,7 @@ Handle the choices:
   - If the entry has a local folder (mirror or hybrid), delete it.
   - Record as a deletion in the final report.
 
-If `TRIAGE_MODE` is `hybrid` and the entry is remote-only, after the user picks Option 1/2/3, AskUserQuestion: "Mirror this ticket locally before promotion so `/research` `/plan` `/build` `/vqa` can run?" → 1. Mirror  2. Promote remote-only.
+If `TRIAGE_MODE` is `hybrid` and the entry is remote-only, after the user picks Option 1/2/3, AskUserQuestion: "Mirror this ticket locally before promotion so `/research` `/plan` `/build` `/review` can run?" → 1. Mirror  2. Promote remote-only.
 
 Do **not** promote yet. Just collect decisions.
 
@@ -204,5 +204,5 @@ For mirror operations triggered in Step 5 hybrid choice, materialize the local f
   - Any promotion failures with the underlying error from the `create-ticket promote` call and the ID that did not get promoted
   - Recommended next step:
     - If mirrored: `/plan` on newly promoted tickets, or `/research` if several need investigation.
-    - If remote-only: "Want me to mirror these locally on demand so `/research` `/plan` `/build` `/vqa` can run? Re-run `/create-backlog` after switching Triage mode in `memory.md`."
+    - If remote-only: "Want me to mirror these locally on demand so `/research` `/plan` `/build` `/review` can run? Re-run `/create-backlog` after switching Triage mode in `memory.md`."
     - If Step 1 bootstrap ran and the user wants the full project skeleton (CLAUDE.md, `.claude/skills/`, starter tickets, status columns, label setup), recommend `/project-start`.

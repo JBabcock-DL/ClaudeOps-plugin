@@ -172,7 +172,7 @@ For `ctx` tickets from a structured design source:
 
 For all ticket types:
 - [ ] All content is in the description field — nothing deferred to a comment or external doc not linked in the body
-- [ ] **Figma VQA Checklist** section present (in `wo` and `bug` bodies). If a Figma URL was provided as part of the source, parse `file_key` and `node_id` from it (`figma.com/design/<fileKey>/...?node-id=<nodeId>`, converting `-` to `:`) and write them into the `Figma source` table along with the deep link and frame name. Leave the Assertions table empty — `/vqa` fills it. If the ticket has no UI surface, replace the checklist body with the literal sentinel `**N/A — no Figma artifact (backend / API / infra ticket).**` (or the bug-template equivalent). Never leave the section blank or with placeholder TODO values — `/vqa` will hard-stop on those.
+- [ ] **Figma VQA Checklist** section present (in `wo` and `bug` bodies). If a Figma URL was provided as part of the source, parse `file_key` and `node_id` from it (`figma.com/design/<fileKey>/...?node-id=<nodeId>`, converting `-` to `:`) and write them into the `Figma source` table along with the deep link and frame name. Leave the Assertions table empty — `/review` fills it. If the ticket has no UI surface, replace the checklist body with the literal sentinel `**N/A — no Figma artifact (backend / API / infra ticket).**` (or the bug-template equivalent). Never leave the section blank or with placeholder TODO values — `/review` will hard-stop on those.
 
 4. **Sync to the remote backend first** — execute **only** the branch matching **`BACKEND`**. GitHub labels follow the ticket type. For Jira, **`issueTypeName`** comes **only** from **AskUserQuestion** whose options are **`availableIssueTypeNames`** from the **MCP fetch** — never from **`workflow.md`** issue-type lines.
 
@@ -187,7 +187,7 @@ For all ticket types:
 1. Create the GitHub issue using `gh` CLI with the correct label. The issue title must be prefixed with the ticket ID: `{TICKET-ID}: {title}` (e.g. `WO-001: Configure project goal in workflow.md`, `CTX-002: Designer dump for checkout flow`). Use the composed body from step 3 as `--body`.
 2. Capture the issue number for frontmatter (`github_issue`).
 3. Add the issue to the project board using the **project number** and **owner** from the **Ticket Tracker — GitHub** section of `workflow.md`; capture the returned project item ID (`PVTI_...`) for `project_item_id`.
-4. Set the Status field to **Context Backlog** using the Project ID, status field ID, and Context Backlog option ID from `workflow.md` (same single-select mutation shown in the **Key Commands (GitHub)** block).
+4. Set the Status field to **Backlog** using the Project ID, status field ID, and Backlog option ID from `workflow.md` (same single-select mutation shown in the **Key Commands (GitHub)** block).
 
 #### Backend: Jira
 
@@ -202,11 +202,11 @@ All Jira work goes through the **Atlassian MCP server**. Before calling any MCP 
    Include these labels on creation (via **`additional_fields`** / labels as required by the MCP descriptor):
    - `claude-ops`
    - One of `bug`, `work-order`, or `context` (matching the ticket type)
-   - `phase:context-backlog`
+   - `phase:backlog`
    Use the composed body from step 3 as the issue description. Prefer plain text / wiki markup over ADF.
 3. Capture the returned `key` (e.g. `PROJ-123`) and `id` from the MCP response for `jira_issue` and `jira_issue_id` frontmatter.
-4. **Verify labels round-tripped** — call `getJiraIssue` and confirm the new issue has all of: `claude-ops`, the type label (`bug` / `work-order` / `context`), and `phase:context-backlog`. If any are missing (some Jira projects strip labels not declared in the project's label scheme, or the MCP shape stored them under a different field), re-apply via the canonical procedure in `skills/conventions/02-jira-phase-transition.md` (`getJiraIssue` → compute the full label set → `editJiraIssue` with the complete array → re-verify).
-5. **Optionally transition Status** to match `phase:context-backlog`. Read the **Phase → Transition map** from `workflow.md`. If the row for `phase:context-backlog` is not `skip`, call `getTransitionsForJiraIssue` on the new issue key, match the configured transition name case-insensitively against `transitions[].name` to get its `id`, then call `transitionJiraIssue` with that `id`. If the configured name is not currently available (workflow guard — newly created issues often start in the right column already) or the row is `skip`, continue without erroring — the label is authoritative.
+4. **Verify labels round-tripped** — call `getJiraIssue` and confirm the new issue has all of: `claude-ops`, the type label (`bug` / `work-order` / `context`), and `phase:backlog`. If any are missing (some Jira projects strip labels not declared in the project's label scheme, or the MCP shape stored them under a different field), re-apply via the canonical procedure in `skills/conventions/02-jira-phase-transition.md` (`getJiraIssue` → compute the full label set → `editJiraIssue` with the complete array → re-verify).
+5. **Optionally transition Status** to match `phase:backlog`. Read the **Phase → Transition map** from `workflow.md`. If the row for `phase:backlog` is not `skip`, call `getTransitionsForJiraIssue` on the new issue key, match the configured transition name case-insensitively against `transitions[].name` to get its `id`, then call `transitionJiraIssue` with that `id`. If the configured name is not currently available (workflow guard — newly created issues often start in the right column already) or the row is `skip`, continue without erroring — the label is authoritative.
 
 If **`createJiraIssue`** still fails on issue type, refetch **`getJiraProjectIssueTypesMetadata`** (MCP only), refresh **`availableIssueTypeNames`**, run **AskUserQuestion** again, and retry. You may **optionally** edit **`workflow.md`** **Issue type — …** lines afterward to record what was chosen — purely documentation; the next **`/create-ticket`** run still **must** fetch from Jira via MCP and ask again from that fresh list.
 
@@ -227,7 +227,7 @@ If the remote sync in step 4 fails, **do not** create the sprint folder or **`ti
 - Backend used (`github` or `jira`)
 - **If GitHub:** the GitHub issue URL and the project item ID
 - **If Jira:** the Jira issue key, the full Jira URL (`<siteUrl>/browse/<KEY>`), and the labels applied
-- If `ctx`: remind the user that this ticket is in intake and must be promoted via `/create-ticket promote {CTX-ID}` or `/create-backlog` before research / plan / build / vqa will run on it.
+- If `ctx`: remind the user that this ticket is in intake and must be promoted via `/create-ticket promote {CTX-ID}` or `/create-backlog` before research / plan / build / review will run on it.
 
 ---
 
@@ -273,11 +273,11 @@ If **`DELEGATED_REMOTE_ONLY=true`**, skip every local file mutation (steps 1–7
    - Remove `github_issue`, `project_item_id`, `jira_issue`, and `jira_issue_id` — the remote issue is now owned by the promoted parent `ticket.md` (same remote record, relabeled in place). Add a one-line HTML comment at the top of the body if helpful: `<!-- Remote issue tracked on parent ../ticket.md -->`.
 5. Write the promoted `ticket.md` using the correct template (`bug_report.md` or `work_order.md`) per **`skills/conventions/01-plugin-root-and-templates.md`**, **migrating salient content** from the archived CTX body for day-to-day work — while treating the nested archive as the **authoritative** full capture:
    - **Goal**, **Design reference**, **Requirements** (all subsections), **Acceptance criteria**, **Out of scope**, and **Notes for build agent** — map into the target template's **Goal**, **Design reference**, **Requirements**, **Acceptance criteria** / **Success Criteria**, and build-ready sections. Do not drop actionable bullets during migration.
-   - **Design reference → Figma VQA Checklist:** when the archived CTX has **File key** and **Node ID** in its Design reference table, copy them into the promoted ticket's **Design reference** table **and** into the **Figma VQA Checklist** `file_key` / `node_id` / deep-link rows — `/vqa` and `/figma-build` depend on these surviving promotion.
+   - **Design reference → Figma VQA Checklist:** when the archived CTX has **File key** and **Node ID** in its Design reference table, copy them into the promoted ticket's **Design reference** table **and** into the **Figma VQA Checklist** `file_key` / `node_id` / deep-link rows — `/review` and `/figma-build` depend on these surviving promotion.
    - **Source** and **Raw Notes** → **Additional Context** (bug) or **Problem story** / **Hypothesis** (work order), unless already folded above.
    - **Observed Problems / Opportunities** → seed **Requirements**.
    - **Assets & Links** and **Related Tickets** → **References**.
-   - In **References**, **always** add as the first bullet: `- **Context capture (authoritative):** [CTX-### — original handoff](./context/CTX-###-{old-slug}/ticket.md) — full Figma scaffold, design reference, and raw notes preserved at promotion. Agents should read this when `/plan`, `/build`, or `/vqa` need canvas fidelity beyond the migrated summary.`
+   - In **References**, **always** add as the first bullet: `- **Context capture (authoritative):** [CTX-### — original handoff](./context/CTX-###-{old-slug}/ticket.md) — full Figma scaffold, design reference, and raw notes preserved at promotion. Agents should read this when `/plan`, `/build`, or `/review` need canvas fidelity beyond the migrated summary.`
    - Do **not** embed a duplicate full CTX body in the promoted ticket — the nested archive is the single verbatim copy.
 6. Update frontmatter on the promoted `ticket.md`:
    - Change `type:` to `bug` or `work-order`.
@@ -294,7 +294,7 @@ If **`DELEGATED_REMOTE_ONLY=true`**, skip every local file mutation (steps 1–7
 - Remove the `context` label and add `bug` or `work-order`:
   `gh issue edit {github_issue} --remove-label context --add-label {bug|work-order}`
 - Replace the issue body with the new ticket.md body via `gh issue edit {github_issue} --body "..."`.
-- Leave the project board Status on **Context Backlog** — the promoted ticket is now ready for the normal lifecycle starting at `/research` or `/plan`.
+- Leave the project board Status on **Backlog** — the promoted ticket is now ready for the normal lifecycle starting at `/research` or `/plan`.
 
 #### Backend: Jira
 
@@ -302,7 +302,7 @@ Use the Atlassian MCP. **Before** choosing the target **`issuetype`**, call **`g
 
 - **Always** run **AskUserQuestion** after the fetch; options **only** from **`availableIssueTypeNames`** (same rules as create mode). **Do not** read **`workflow.md` Issue type — …** lines to build options or to phrase suggested type names — only MCP-returned names are accurate for the Jira project.
 - Update the issue summary to `{NEW-ID}: {title}` via `editJiraIssue`.
-- Update labels: remove `context`, add `bug` or `work-order` (keep `claude-ops` and `phase:context-backlog`).
+- Update labels: remove `context`, add `bug` or `work-order` (keep `claude-ops` and `phase:backlog`).
 - Update the `issuetype` field to the resolved name. If **`editJiraIssue`** refuses the update (scheme / permissions), fall back gracefully: leave Jira issue type as-is, keep the `bug` / `work-order` label as the authoritative type signal, and report this in the final output.
 - Replace the description with the new ticket.md body.
 

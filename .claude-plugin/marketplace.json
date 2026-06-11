@@ -10,7 +10,7 @@
     {
       "name": "labs-agent-workflow",
       "source": "./",
-      "description": "Structured agent workflow for Claude Code with pluggable ticket backend — GitHub Issues + a Project board, or Jira Cloud via the Atlassian MCP. Ticket lifecycle skills from create-ticket through research, plan, build, and vqa.",
+      "description": "Structured agent workflow for Claude Code with pluggable ticket backend — GitHub Issues + a Project board, or Jira Cloud via the Atlassian MCP. Ticket lifecycle skills from create-ticket through research, plan, build, and review.",
       "version": "1.0.0"
     }
   ]
