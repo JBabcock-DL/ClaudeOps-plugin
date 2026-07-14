@@ -1,6 +1,6 @@
-# dl-agent-workflow
+# labs-agent-workflow
 
-A Claude Code plugin that provides a structured agent workflow for managing software work in Claude Code. Tickets sync to your choice of backend — **GitHub Issues + a GitHub Project board**, or **Jira Cloud via the Atlassian MCP**. Work is organized into sprint folders under `.github/`, each ticket gets a `ticket.md` and a `plan.md`, and a set of 12 skills covers the full lifecycle from raw context intake through ticket creation, research, planning, implementation (code, docs, scripts, APIs, Figma), and QA verification.
+A Claude Code plugin that provides a structured agent workflow for managing software work in Claude Code. Tickets sync to your choice of backend — **GitHub Issues + a GitHub Project board**, or **Jira Cloud via the Atlassian MCP**. Work is organized into sprint folders under `.github/`, each ticket gets a `ticket.md` and a `plan.md`, and a set of 13 skills covers the full lifecycle from raw context intake through ticket creation, research, planning, implementation (code, docs, scripts, APIs, Figma), and QA verification.
 
 Tickets come in three flavors:
 
@@ -32,22 +32,31 @@ Then, depending on which ticket backend you plan to use:
 
 ## Install the Plugin
 
-### From Claude Code Desktop
+### Option A: From the Marketplace (recommended for teams)
+
+```
+/plugin marketplace add JBabcock-DL/ClaudeOps-plugin
+/plugin install labs-agent-workflow@claude-ops
+```
+
+### Option B: Direct Install
+
+#### From Claude Code Desktop
 
 1. Open Claude Code and go to **Settings → Extensions**
 2. Click **Add Plugin** and enter the GitHub repo:
    ```
    JBabcock-DL/ClaudeOps-plugin
    ```
-3. Click **Install** — Claude Code will pull the plugin and register all 11 skills
+3. Click **Install** — Claude Code will pull the plugin and register all 13 skills
 
-### From the Command Line
+#### From the Command Line
 
 ```bash
 claude plugin install JBabcock-DL/ClaudeOps-plugin
 ```
 
-The skills are immediately available as `/dl-agent-workflow:<skill-name>` in any Claude Code session (e.g. `/dl-agent-workflow:create-ticket`).
+The skills are immediately available as `/labs-agent-workflow:<skill-name>` in any Claude Code session (e.g. `/labs-agent-workflow:create-ticket`).
 
 ---
 

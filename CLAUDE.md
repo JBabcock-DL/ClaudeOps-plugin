@@ -1,6 +1,6 @@
-# claude-ops (dl-agent-workflow)
+# claude-ops (labs-agent-workflow)
 
-This repository ships the **dl-agent-workflow** plugin for Claude Code. Consumer projects that run `/project-start` get their own `CLAUDE.md` and `memory.md` with the same **agent rules** below, customized with their project name and backend.
+This repository ships the **labs-agent-workflow** plugin for Claude Code. Consumer projects that run `/project-start` get their own `CLAUDE.md` and `memory.md` with the same **agent rules** below, customized with their project name and backend.
 
 ## Agent rules — no user prompt required
 

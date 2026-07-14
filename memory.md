@@ -26,7 +26,7 @@ You **must** do this without the user having to ask:
 - **Default branch / PR target:** *e.g. `main`*
 - **Current sprint folder:** *e.g. `.github/Sprint 1/` (update when a new sprint starts)*
 - **Stack / runtimes (if this is an app repo):** *e.g. Node 22, pnpm, test runner*
-- **This repo is:** *application codebase | `dl-agent-workflow` plugin / template only | monorepo — adjust behavior accordingly*
+- **This repo is:** *application codebase | `labs-agent-workflow` plugin / template only | monorepo — adjust behavior accordingly*
 
 ---
 
