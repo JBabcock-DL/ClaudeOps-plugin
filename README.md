@@ -39,22 +39,21 @@ Then, depending on which ticket backend you plan to use:
 /plugin install labs-agent-workflow@claude-ops
 ```
 
-### Option B: Direct Install
+### Option B: From the Desktop app
 
-#### From Claude Code Desktop
+1. Open Claude Code and go to **Settings → Plugins → Marketplaces**
+2. Add the marketplace `JBabcock-DL/ClaudeOps-plugin`
+3. Install **labs-agent-workflow** (registers all 13 skills)
 
-1. Open Claude Code and go to **Settings → Extensions**
-2. Click **Add Plugin** and enter the GitHub repo:
-   ```
-   JBabcock-DL/ClaudeOps-plugin
-   ```
-3. Click **Install** — Claude Code will pull the plugin and register all 13 skills
+### Updating / reinstalling (e.g. after a failed install)
 
-#### From the Command Line
-
-```bash
-claude plugin install JBabcock-DL/ClaudeOps-plugin
 ```
+/plugin marketplace update claude-ops
+/plugin uninstall labs-agent-workflow@claude-ops
+/plugin install labs-agent-workflow@claude-ops
+```
+
+If a Windows install still fails, delete the stale cache folders under `%USERPROFILE%\.claude\plugins\` (`cache\claude-ops` and the `claude-ops` entry in `marketplaces`) and re-add the marketplace.
 
 The skills are immediately available as `/labs-agent-workflow:<skill-name>` in any Claude Code session (e.g. `/labs-agent-workflow:create-ticket`).
 
